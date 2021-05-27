@@ -65,7 +65,6 @@ coroutine.wrap(function()
 while true do 
   -- / This is the mine aura.
 	while _G.MINEAURA do
-		print("mine")
 		for i1,v1 in next, game:GetService("Workspace")["WORKSPACE_Interactables"].Mining.OreDeposits:GetDescendants() do -- / This is a bit shit tbh, and I'll rewrite this later so it has all the ore deposits it can use in a table.
 			if v1.Name:sub(-3) == "Ore" or v1.Name:sub(-4) == "Base" then
 				if v1.Parent:FindFirstChild("DepositInfo") then
