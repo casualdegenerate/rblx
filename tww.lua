@@ -13,7 +13,8 @@ local library = loadstring(game:HttpGet('https://raw.githubusercontent.com/AikaV
 local WMain = library:CreateWindow("pZVMHtbZ6y/Skidware") -- / Before the slash is an invite to my media server, and the stuff after is just a joke name I like to use for my stuff :3
 local Fmining = WMain:CreateFolder("Mining") -- / This is the mining folder in the UI
 --local Fesp = WMain:CreateFolder("Announce ESP") -- / This is ESP stuff i guess?
-local WWarp = library:CreateWindow("Warp/WIP") -- / This will have things inside later~
+local WWarp = WMain:CreateFolder("Warp/WIP") -- / This will have things inside later~
+
 
 local lplr = game:GetService("Players").LocalPlayer -- / Defining the local player!
 _G.MINEAURA = false -- / Default off
@@ -53,7 +54,7 @@ Fmining:Toggle(
 		if bool then
 			print("active")
 			_G.MINEAURA = true
-			while _G.MINEAURA do -- / This is the function for mine aura, when you turn it off it will stop.
+			coroutine.wrap(function()while _G.MINEAURA do -- / This is the function for mine aura, when you turn it off it will stop.
 				for i1,v1 in next, game:GetService("Workspace")["WORKSPACE_Interactables"].Mining.OreDeposits:GetDescendants() do -- / This is a bit shit tbh, and I'll rewrite this later so it has all the ore deposits it can use in a table.
 					if v1.Name:sub(-3) == "Ore" or v1.Name:sub(-4) == "Base" then
 						if v1.Parent:FindFirstChild("DepositInfo") then
@@ -68,10 +69,27 @@ Fmining:Toggle(
 						end
 					end
 				end
-			wait(.1)end -- / wait() so it does not die for now.
+			wait(.3)end;end)() -- / wait so it does not die for now. ALSO I have to make a coroutine because how this UI library works.
 		else
 			print("inactive")
 			_G.MINEAURA = false
 		end
 	end
 )
+
+local places = {
+	"Bronze",
+	"Dorado",
+	"Tribal",
+	"Delores",
+	"WindmillCamp",
+	"CanyonCamp"
+}
+for i,v in next, places do
+	WWarp:Button(
+		v,
+		function()
+			game:GetService("ReplicatedStorage").Communication.Functions.Respawn:InvokeServer(v)
+		end
+	)
+end
