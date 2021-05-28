@@ -1,3 +1,4 @@
+repeat wait() until game:GetService("Players").LocalPlayer
 if game.PlaceId ~= 2317712696 then
 	game:Shutdown() -- / Hello, my name's RealTwisted :)
 end
