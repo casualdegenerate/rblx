@@ -4,8 +4,12 @@ end
 
 
 -- / Function overwrite
-
-print = printconsole
+if printconsole then
+	print = printconsole
+else
+	print = function()end
+end
+print("Test")
 
 -- / Variables
 
