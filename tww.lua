@@ -13,11 +13,15 @@ local library = loadstring(game:HttpGet('https://raw.githubusercontent.com/AikaV
 local WMain = library:CreateWindow("pZVMHtbZ6y/Skidware") -- / Before the slash is an invite to my media server, and the stuff after is just a joke name I like to use for my stuff :3
 local Fmining = WMain:CreateFolder("Mining") -- / This is the mining folder in the UI
 --local Fesp = WMain:CreateFolder("Announce ESP") -- / This is ESP stuff i guess?
-local WWarp = WMain:CreateFolder("Warp/WIP") -- / This will have things inside later~
+local FWarp = WMain:CreateFolder("Warp/WIP") -- / This will have things inside later~
+local WMisc = library:CreateWindow("Misc")
+local FMemes = WMisc:CreateFolder("Memes")
 
 
 local lplr = game:GetService("Players").LocalPlayer -- / Defining the local player!
 _G.MINEAURA = false -- / Default off
+
+
 
 -- / Namecall manipulation for grabbing remotes ;)
 local mt = getrawmetatable(game) make_writeable(mt) local old = mt.__namecall
@@ -55,14 +59,18 @@ Fmining:Toggle(
 			print("active")
 			_G.MINEAURA = true
 			coroutine.wrap(function()while _G.MINEAURA do -- / This is the function for mine aura, when you turn it off it will stop.
-				for i1,v1 in next, game:GetService("Workspace")["WORKSPACE_Interactables"].Mining.OreDeposits:GetDescendants() do -- / This is a bit shit tbh, and I'll rewrite this later so it has all the ore deposits it can use in a table.
-					if v1.Name:sub(-3) == "Ore" or v1.Name:sub(-4) == "Base" then
-						if v1.Parent:FindFirstChild("DepositInfo") then
-							if v1.Parent.DepositInfo:FindFirstChild("OreRemaining") then
-								if v1.Parent.DepositInfo.OreRemaining.Value ~= 0 then
-									if (game:GetService("Players").LocalPlayer.Character.Head.Position-v1.Position).Magnitude < 8 then -- / This is your client side reach(it will have a limit on server side)
-										hit(v1)
-										wait(.5) -- / Serverside has a cooldown around this.
+				if lplr.Character then
+					if lplr.Character:FindFirstChild("Head") then
+						for i1,v1 in next, game:GetService("Workspace")["WORKSPACE_Interactables"].Mining.OreDeposits:GetDescendants() do -- / This is a bit shit tbh, and I'll rewrite this later so it has all the ore deposits it can use in a table.
+							if v1.Name:sub(-3) == "Ore" or v1.Name:sub(-4) == "Base" then
+								if v1.Parent:FindFirstChild("DepositInfo") then
+									if v1.Parent.DepositInfo:FindFirstChild("OreRemaining") then
+										if v1.Parent.DepositInfo.OreRemaining.Value ~= 0 then
+											if (game:GetService("Players").LocalPlayer.Character.Head.Position-v1.Position).Magnitude < 8 then -- / This is your client side reach(it will have a limit on server side)
+												hit(v1)
+												wait(.5) -- / Serverside has a cooldown around this.
+											end
+										end
 									end
 								end
 							end
@@ -86,10 +94,54 @@ local places = {
 	"CanyonCamp"
 }
 for i,v in next, places do
-	WWarp:Button(
+	FWarp:Button(
 		v,
 		function()
 			game:GetService("ReplicatedStorage").Communication.Functions.Respawn:InvokeServer(v)
 		end
 	)
 end
+
+
+local function race(val)
+	game:GetService("ReplicatedStorage").Communication.Events.SelectSkinColor:FireServer(val)
+end
+FMemes:Toggle(
+	"Racist",
+	function(bool)
+		if bool then
+			_G.RACIST = true
+			coroutine.wrap(function()while _G.RACIST do
+				for i=1,10 do
+					race(i)
+				wait(.1)end
+				for i=10,1,-1 do
+					race(i)
+				wait(.1)end
+			wait()end;end)()
+		else
+			_G.RACIST = false
+		end
+	end
+)
+
+FMemes:Toggle(
+	"Auto Duel",
+	function(bool)
+		if bool then
+			_G.AUTODUEL = true
+			coroutine.wrap(function()while _G.AUTODUEL do
+				for i,plr in next, game:GetService("Players"):GetPlayers() do
+					if plr ~= lplr and plr.Character then
+						if not lplr.PlayerGui.Notifications.Duel.Visible then
+							game:GetService("ReplicatedStorage").Communication.Events.DuelRequest:FireServer(plr)
+							wait(.5)
+						end
+					end
+				end
+			fwait()end;end)()
+		else
+			_G.AUTODUEL = false
+		end
+	end
+)
