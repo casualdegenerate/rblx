@@ -11,6 +11,8 @@ else
 end
 print("Test")
 
+fwait = wait
+
 -- / Variables
 
 local library = loadstring(game:HttpGet('https://raw.githubusercontent.com/AikaV3rm/UiLib/master/Lib.lua'))() -- / My friend uses this too and a lot of other people, and I'd rather not make my own library, so I'll just use this one
@@ -19,9 +21,11 @@ local Fmining = WMain:CreateFolder("Mining") -- / This is the mining folder in t
 --local Fesp = WMain:CreateFolder("Announce ESP") -- / This is ESP stuff i guess?
 local FWarp = WMain:CreateFolder("Warp/WIP") -- / This will have things inside later~
 local WMisc = library:CreateWindow("Misc")
+local FServer = WMisc:CreateFolder("Server")
 local FMemes = WMisc:CreateFolder("Memes")
 
 
+local function js(i)return game:GetService("HttpService"):JSONDecode(i)end
 local lplr = game:GetService("Players").LocalPlayer -- / Defining the local player!
 _G.MINEAURA = false -- / Default off
 
@@ -147,5 +151,46 @@ FMemes:Toggle(
 		else
 			_G.AUTODUEL = false
 		end
+	end
+)
+
+
+
+FServer:Button(
+	"ServerHop",
+	function()
+		if _G.MAXPLAYERS then
+			local index = 0
+			while index do
+				if index == 0 then index = "" end
+				local res = syn.request{
+					Url = "https://games.roblox.com/v1/games/2317712696/servers/Public?sortOrder=Asc&limit=100&cursor="..index,
+					Method = "GET"
+				}
+				for i,v in next, js(res.Body).data do
+					if v.playing < _G.MAXPLAYERS then
+						print("Attempting to join\n"..tostring(v.id).."\n"..tostring(v.playing).."/"..tostring(v.maxPlayers))
+						game:GetService("TeleportService"):TeleportToPlaceInstance(2317712696,tostring(v.id))
+						wait(15)
+					else
+						print(tostring(v.id).." | "..tostring(v.playing).."/"..tostring(v.maxPlayers))
+					end
+				end
+				index = js(res.Body).nextPageCursor
+			wait()end
+			print("There are no servers with your settings or there might have been a critical flaw. If you think this is a bug please contact casual_degenerate#7475 or go to pZVMHtbZ6y",255,0,0)
+		end
+	end
+)
+
+FServer:Slider(
+	"Max Players",
+	{
+		min = 1,
+		max = 29,
+		precise = false,
+	}, 
+	function(range)
+		_G.MAXPLAYERS = range
 	end
 )
