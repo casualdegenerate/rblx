@@ -53,35 +53,25 @@ Fmining:Toggle(
 		if bool then
 			print("active")
 			_G.MINEAURA = true
+			while _G.MINEAURA do -- / This is the function for mine aura, when you turn it off it will stop.
+				for i1,v1 in next, game:GetService("Workspace")["WORKSPACE_Interactables"].Mining.OreDeposits:GetDescendants() do -- / This is a bit shit tbh, and I'll rewrite this later so it has all the ore deposits it can use in a table.
+					if v1.Name:sub(-3) == "Ore" or v1.Name:sub(-4) == "Base" then
+						if v1.Parent:FindFirstChild("DepositInfo") then
+							if v1.Parent.DepositInfo:FindFirstChild("OreRemaining") then
+								if v1.Parent.DepositInfo.OreRemaining.Value ~= 0 then
+									if (game:GetService("Players").LocalPlayer.Character.Head.Position-v1.Position).Magnitude < 8 then -- / This is your client side reach(it will have a limit on server side)
+										hit(v1)
+										wait(.5) -- / Serverside has a cooldown around this.
+									end
+								end
+							end
+						end
+					end
+				end
+			wait(.1)end -- / wait() so it does not die for now.
 		else
 			print("inactive")
 			_G.MINEAURA = false
 		end
 	end
 )
-
--- / All togglable while loops will be in here, until I get my head straighthh
-coroutine.wrap(function()
-while true do 
-  -- / This is the mine aura.
-	while _G.MINEAURA do
-		for i1,v1 in next, game:GetService("Workspace")["WORKSPACE_Interactables"].Mining.OreDeposits:GetDescendants() do -- / This is a bit shit tbh, and I'll rewrite this later so it has all the ore deposits it can use in a table.
-			if v1.Name:sub(-3) == "Ore" or v1.Name:sub(-4) == "Base" then
-				if v1.Parent:FindFirstChild("DepositInfo") then
-					if v1.Parent.DepositInfo:FindFirstChild("OreRemaining") then
-						if v1.Parent.DepositInfo.OreRemaining.Value ~= 0 then
-							if (game:GetService("Players").LocalPlayer.Character.Head.Position-v1.Position).Magnitude < 14 then
-								hit(v1)
-								wait(.5)
-							end
-						end
-					end
-				end
-			end
-		end
-	wait()end
-wait()end
-end)()
-
-
-
