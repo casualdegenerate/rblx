@@ -1,7 +1,7 @@
 if game.PlaceId ~= 2317712696 then
 	game:Shutdown() -- / Hello, my name's RealTwisted :)
 end
-
+syn.queue_on_teleport([[loadstring(game:HttpGet("https://raw.githubusercontent.com/casualdegenerate/rblx/main/tww.lua"))()]])
 
 -- / Function overwrite
 if printconsole then
