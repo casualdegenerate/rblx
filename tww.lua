@@ -126,7 +126,7 @@ FMemes:Toggle(
 )
 
 FMemes:Toggle(
-	"Auto Duel",
+	"Duel All",
 	function(bool)
 		if bool then
 			_G.AUTODUEL = true
@@ -139,7 +139,7 @@ FMemes:Toggle(
 						end
 					end
 				end
-			fwait()end;end)()
+			wait()end;end)()
 		else
 			_G.AUTODUEL = false
 		end
