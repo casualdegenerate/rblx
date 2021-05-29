@@ -95,18 +95,19 @@ Fmining:Toggle(
 )
 
 local places = {
-	"Bronze",
-	"Dorado",
-	"Tribal",
-	"Delores",
-	"WindmillCamp",
-	"CanyonCamp"
+	{"Bronze City","Bronze"},
+	{"Puerto Dorado","Dorado"},
+	{"Tribal Village","Tribal"},
+	{"Callahan Manor","Delores"},
+	{"Howling Peak","HowlingPeak"},
+	{"Windmill Camp(+5)","WindmillCamp"},
+	{"Outlaw's Perch(+5)","CanyonCamp"}
 }
 for i,v in next, places do
 	FWarp:Button(
-		v,
+		v[1],
 		function()
-			game:GetService("ReplicatedStorage").Communication.Functions.Respawn:InvokeServer(v)
+			game:GetService("ReplicatedStorage").Communication.Functions.Respawn:InvokeServer(v[2])
 		end
 	)
 end
