@@ -202,15 +202,15 @@ FBlant:Toggle(
 	function(bool)
 		if bool then
 			_G.WATERWALK = true
-			while _G.WATERWALK do
+			coroutine.wrap(function()while _G.WATERWALK do
 				if lplr.Character then
 					if lplr.Character:FindFirstChild("Head") then
 						game:GetService("ReplicatedStorage").Communication.Events.CreateWaterSplash:FireServer(lplr.Character.Head.Position)
 					end
 				end
-			wait(.1)end
+			wait(.1)end;end)()
 		else
-			_G.WALKWATER = false
+			_G.WATERWALK = false
 		end
 	end
 )
