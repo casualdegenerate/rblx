@@ -170,7 +170,7 @@ FServer:Button(
 					Method = "GET"
 				}
 				for i,v in next, js(res.Body).data do
-					if v.playing < _G.MAXPLAYERS then
+					if v.playing <= _G.MAXPLAYERS then
 						print("Attempting to join\n"..tostring(v.id).."\n"..tostring(v.playing).."/"..tostring(v.maxPlayers))
 						game:GetService("TeleportService"):TeleportToPlaceInstance(2317712696,tostring(v.id))
 						wait(15)
