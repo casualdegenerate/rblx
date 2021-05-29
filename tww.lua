@@ -23,7 +23,7 @@ local Fmining = WMain:CreateFolder("Mining") -- / This is the mining folder in t
 local FWarp = WMain:CreateFolder("Warp/WIP") -- / This will have things inside later~
 local WMisc = library:CreateWindow("Misc")
 local FServer = WMisc:CreateFolder("Server")
-local FMemes = WMisc:CreateFolder("Memes")
+local FBlant = WMisc:CreateFolder("Blant")
 
 
 local function js(i)return game:GetService("HttpService"):JSONDecode(i)end
@@ -116,7 +116,7 @@ end
 local function race(val)
 	game:GetService("ReplicatedStorage").Communication.Events.SelectSkinColor:FireServer(val)
 end
-FMemes:Toggle(
+FBlant:Toggle(
 	"Racist",
 	function(bool)
 		if bool then
@@ -135,7 +135,7 @@ FMemes:Toggle(
 	end
 )
 
-FMemes:Toggle(
+FBlant:Toggle(
 	"Duel All",
 	function(bool)
 		if bool then
@@ -196,3 +196,22 @@ FServer:Slider(
 		_G.MAXPLAYERS = range
 	end
 )
+
+FBlant:Toggle(
+	"Drip",
+	function(bool)
+		if bool then
+			_G.WATERWALK = true
+			while _G.WATERWALK do
+				if lplr.Character then
+					if lplr.Character:FindFirstChild("Head") then
+						game:GetService("ReplicatedStorage").Communication.Events.CreateWaterSplash:FireServer(lplr.Character.Head.Position)
+					end
+				end
+			wait(.1)end
+		else
+			_G.WALKWATER = false
+		end
+	end
+)
+
