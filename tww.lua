@@ -25,10 +25,11 @@ local RunService = game:GetService("RunService");
 local UserInputService = game:GetService("UserInputService");
 local Mouse = lplr:GetMouse();
 local CurrentCamera = workspace.CurrentCamera;
-local Entities = game.workspace:FindFirstChild("WORKSPACE_Entities");
+repeat wait() until workspace:FindFirstChild("WORKSPACE_Entities") and ReplicatedStorage:FindFirstChild("Modules") and ReplicatedStorage.Modules:FindFirstChild("Load") and ReplicatedStorage:FindFirstChild("SharedModules") and ReplicatedStorage.SharedModules:FindFirstChild("Load") and ReplicatedStorage.SharedModules:FindFirstChild("Global")
+local Entities = workspace:FindFirstChild("WORKSPACE_Entities");
 local LoadModule = require(ReplicatedStorage.Modules.Load);
 local LoadSharedModule = require(ReplicatedStorage.SharedModules.Load);
-local Global = require(game:GetService("ReplicatedStorage").SharedModules.Global);
+local Global = require(ReplicatedStorage.SharedModules.Global);
 local AnimalModule, BreakableGlassModule, CameraModule, ClientProjectiles, GunItemModule, NetworkModule, PlayerCharacterModule, SharedUtilsModule, UtilsModule; do
 AnimalModule = LoadModule("Animal");
 BreakableGlassModule = LoadModule("BreakableGlass");
@@ -182,6 +183,7 @@ FServer:Button(
 				}
 				for i,v in next, js(res.Body).data do
 					if v.playing <= _G.MAXPLAYERS then
+						if not isfile("servers cache.txt") then writefile("servers cache.txt","") end
 						if _G.NEWSERVERS and not readfile("servers cache.txt"):find(v.id) then
 							print("Attempting to join\n"..tostring(v.id).."\n"..tostring(v.playing).."/"..tostring(v.maxPlayers))
 							appendfile("servers cache.txt",v.id.."\n")
