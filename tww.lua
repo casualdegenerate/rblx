@@ -43,8 +43,8 @@ UtilsModule = LoadModule("Utils");
 end
 
 
-_G.MINEAURA = false -- / Default off
-
+_G.MINEAURA = false -- / Default Off
+_G.MAXPLAYERS = 29 -- / Default 29
 
 
 
