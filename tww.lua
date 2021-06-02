@@ -17,48 +17,87 @@ fwait = wait
 -- / Variables
 local function js(i)return game:GetService("HttpService"):JSONDecode(i)end
 local lplr = game:GetService("Players").LocalPlayer -- / Defining the local player!
+local Players = game:GetService("Players");
+local Lighting = game:GetService("Lighting");
+local ReplicatedStorage = game:GetService("ReplicatedStorage");
+local VirtualUser = game:GetService("VirtualUser");
+local RunService = game:GetService("RunService");
+local UserInputService = game:GetService("UserInputService");
+local Mouse = lplr:GetMouse();
+local CurrentCamera = workspace.CurrentCamera;
+local Entities = game.workspace:FindFirstChild("WORKSPACE_Entities");
+local LoadModule = require(ReplicatedStorage.Modules.Load);
+local LoadSharedModule = require(ReplicatedStorage.SharedModules.Load);
+local Global = require(game:GetService("ReplicatedStorage").SharedModules.Global);
+local AnimalModule, BreakableGlassModule, CameraModule, ClientProjectiles, GunItemModule, NetworkModule, PlayerCharacterModule, SharedUtilsModule, UtilsModule; do
+AnimalModule = LoadModule("Animal");
+BreakableGlassModule = LoadModule("BreakableGlass");
+CameraModule = LoadModule("Camera");
+ClientProjectiles = LoadModule("ClientProjectiles");
+GunItemModule = LoadModule("GunItem");
+NetworkModule = LoadSharedModule("Network");
+PlayerCharacterModule = LoadModule("PlayerCharacter");
+SharedUtilsModule = LoadSharedModule("SharedUtils");
+CharRepUtilsModule = LoadSharedModule("CharRepUtils");
+UtilsModule = LoadModule("Utils");
+end
+
+
 _G.MINEAURA = false -- / Default off
 
 
 
--- / Namecall manipulation for grabbing remotes ;)
+
+
+-- / Remote manipulation
+
+--[[
 local mt = getrawmetatable(game) make_writeable(mt) local old = mt.__namecall
 mt.__namecall = newcclosure(function(self,...)
 	local args = {...} 
 	
 	return old(self,...)
 end)
+--]]
+
+coroutine.wrap(function()
+    while wait() do
+        if _G.MINEAURA then
+			local item = PlayerCharacterModule:GetEquippedItem()
+			if string.match(item.Name, "Pickaxe") then
+				for _,ore in next, game:GetService("Workspace")["WORKSPACE_Interactables"].Mining.OreDeposits:GetDescendants() do 
+					if (string.match(ore.Name, "Ore") or string.match(ore.Name, "Base")) and ore.Parent:FindFirstChild("DepositInfo") and ore.Parent.DepositInfo:FindFirstChild("OreRemaining") and ore.Parent.DepositInfo.OreRemaining.Value ~= 0 and LocalPlayer.Character:FindFirstChild("Head") then
+						if (LocalPlayer.Character.Head.Position-ore.Position).Magnitude < 10 then
+							item:NetworkActivate("MineDeposit", ore.Parent, ore.Position, Vector3.new(-0.165507436, 0.740951896, -0.65084374))
+						end
+					end
+				end
+			end
+		end
+    end
+end)()
 
 
 -- / UI
+
+
+local library = loadstring(game:HttpGet('https://raw.githubusercontent.com/AikaV3rm/UiLib/master/Lib.lua'))() -- / My friend uses this too and a lot of other people, and I'd rather not make my own library, so I'll just use this one
+local WMain = library:CreateWindow("pZVMHtbZ6y/Skidware") -- / Before the slash is an invite to my media server, and the stuff after is just a joke name I like to use for my stuff :3
+local Fmining = WMain:CreateFolder("Mining") -- / This is the mining folder in the UI
+--local Fesp = WMain:CreateFolder("Announce ESP") -- / This is ESP stuff i guess?
+local FWarp = WMain:CreateFolder("Warp/WIP") -- / This will have things inside later~
+local WMisc = library:CreateWindow("Misc")
+local FServer = WMisc:CreateFolder("Server")
+local FBlant = WMisc:CreateFolder("Blant")
+
+
+
 Fmining:Toggle(
 	"Mine Aura", 
 	function(bool)
 		if bool then
-			print("active")
 			_G.MINEAURA = true
-			coroutine.wrap(function()while _G.MINEAURA do -- / This is the function for mine aura, when you turn it off it will stop.
-				if lplr.Character then
-					if lplr.Character:FindFirstChild("Head") then
-						for i1,v1 in next, game:GetService("Workspace")["WORKSPACE_Interactables"].Mining.OreDeposits:GetDescendants() do -- / This is a bit shit tbh, and I'll rewrite this later so it has all the ore deposits it can use in a table.
-							if v1.Name:sub(-3) == "Ore" or v1.Name:sub(-4) == "Base" then
-								if v1.Parent:FindFirstChild("DepositInfo") then
-									if v1.Parent.DepositInfo:FindFirstChild("OreRemaining") then
-										if v1.Parent.DepositInfo.OreRemaining.Value ~= 0 then
-											if (game:GetService("Players").LocalPlayer.Character.Head.Position-v1.Position).Magnitude < 8 then -- / This is your client side reach(it will have a limit on server side)
-												hit(v1)
-												wait(.5) -- / Serverside has a cooldown around this.
-											end
-										end
-									end
-								end
-							end
-						end
-					end
-				end
-			wait(.3)end;end)() -- / wait so it does not die for now. ALSO I have to make a coroutine because how this UI library works.
 		else
-			print("inactive")
 			_G.MINEAURA = false
 		end
 	end
