@@ -15,17 +15,6 @@ print("Test")
 fwait = wait
 
 -- / Variables
-
-local library = loadstring(game:HttpGet('https://raw.githubusercontent.com/AikaV3rm/UiLib/master/Lib.lua'))() -- / My friend uses this too and a lot of other people, and I'd rather not make my own library, so I'll just use this one
-local WMain = library:CreateWindow("pZVMHtbZ6y/Skidware") -- / Before the slash is an invite to my media server, and the stuff after is just a joke name I like to use for my stuff :3
-local Fmining = WMain:CreateFolder("Mining") -- / This is the mining folder in the UI
---local Fesp = WMain:CreateFolder("Announce ESP") -- / This is ESP stuff i guess?
-local FWarp = WMain:CreateFolder("Warp/WIP") -- / This will have things inside later~
-local WMisc = library:CreateWindow("Misc")
-local FServer = WMisc:CreateFolder("Server")
-local FBlant = WMisc:CreateFolder("Blant")
-
-
 local function js(i)return game:GetService("HttpService"):JSONDecode(i)end
 local lplr = game:GetService("Players").LocalPlayer -- / Defining the local player!
 _G.MINEAURA = false -- / Default off
@@ -37,30 +26,11 @@ local mt = getrawmetatable(game) make_writeable(mt) local old = mt.__namecall
 mt.__namecall = newcclosure(function(self,...)
 	local args = {...} 
 	
-    if args[2] == "MineDeposit" then -- / Haha stupid methods go if else if else if else if end end ned end end
-        _G.MINEREMOTE = self
-        _G.MINEINDEX = args[1]
-        for i,v in next, args do
-            printconsole(tostring(i).." "..tostring(v)) -- / Used for debuging
-        end
-	end
-	
 	return old(self,...)
 end)
 
 
-
-local function hit(obj) -- / This is to organize things. So pretty much a function to hit mine deposits/ore vains
-    if _G.MINEREMOTE then
-        local ohNumber1 = _G.MINEINDEX
-        local ohString2 = "MineDeposit"
-        local ohInstance3 = obj.Parent
-        local ohVector34 = obj.Position
-        local ohVector35 = Vector3.new(-0.165507436, 0.740951896, -0.65084374)
-        _G.MINEREMOTE:FireServer(ohNumber1, ohString2, ohInstance3, ohVector34, ohVector35)
-    end
-end
-
+-- / UI
 Fmining:Toggle(
 	"Mine Aura", 
 	function(bool)
@@ -141,9 +111,11 @@ FBlant:Toggle(
 		if bool then
 			_G.AUTODUEL = true
 			coroutine.wrap(function()while _G.AUTODUEL do
-				for i,plr in next, game:GetService("Players"):GetPlayers() do
-					if plr ~= lplr and plr.Character then
-						if not lplr.PlayerGui.Notifications.Duel.Visible then
+				if not lplr.PlayerGui.Notifications.Duel.Visible and lplr.Character then
+					--if lplr.Character:FindFirstChild("Humanoid") then -- / too depressed to finish, but I added a bit more optimization.
+					
+					for i,plr in next, game:GetService("Players"):GetPlayers() do
+						if plr ~= lplr and plr.Character then
 							game:GetService("ReplicatedStorage").Communication.Events.DuelRequest:FireServer(plr)
 							wait(.5)
 						end
@@ -171,9 +143,16 @@ FServer:Button(
 				}
 				for i,v in next, js(res.Body).data do
 					if v.playing <= _G.MAXPLAYERS then
-						print("Attempting to join\n"..tostring(v.id).."\n"..tostring(v.playing).."/"..tostring(v.maxPlayers))
-						game:GetService("TeleportService"):TeleportToPlaceInstance(2317712696,tostring(v.id))
-						wait(15)
+						if _G.NEWSERVERS and not readfile("servers cache.txt"):find(v.id) then
+							print("Attempting to join\n"..tostring(v.id).."\n"..tostring(v.playing).."/"..tostring(v.maxPlayers))
+							appendfile("servers cache.txt",v.id.."\n")
+							game:GetService("TeleportService"):TeleportToPlaceInstance(2317712696,tostring(v.id))
+							wait(15)
+						else
+							print("Attempting to join\n"..tostring(v.id).."\n"..tostring(v.playing).."/"..tostring(v.maxPlayers))
+							game:GetService("TeleportService"):TeleportToPlaceInstance(2317712696,tostring(v.id))
+							wait(15)
+						end
 					else
 						print(tostring(v.id).." | "..tostring(v.playing).."/"..tostring(v.maxPlayers))
 					end
@@ -196,6 +175,15 @@ FServer:Slider(
 		_G.MAXPLAYERS = range
 	end
 )
+
+FServer:Toggle(
+	"New Servers",
+	function(bool)
+		_G.NEWSERVERS = bool
+	end
+)
+
+
 
 FBlant:Toggle(
 	"Drip",
