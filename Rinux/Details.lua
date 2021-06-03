@@ -1,11 +1,26 @@
 -- / I said, if you don't tell me what happened your moms a hoe
 local a,err = pcall(function()
-	local o = {""} -- / Variable name stants for output
+	local o = {""} -- / Variable name stands for output
 
 	local function append(a) -- / Because this shit can't use luau I'd have to compromise
 		o[1] = o[1]..a.."\n"
 	end
 
+	-- / Artistic expresion pog?
+	
+	append(
+		(function()
+			local o = ""
+			for x=1,24 do
+				for y=1,24 do
+					o = o.."/x\n"
+				end
+				o = o.."\n"
+			end
+			return o
+		end)()
+	)
+	
 	-- / Name of the file
 	append("Details.lua")
 	-- / Something to start with
