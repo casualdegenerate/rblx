@@ -111,12 +111,17 @@ local a,err = pcall(function()
 			end
 		end)()
 	)
-	
+	-- / This is so it can tell if it it were called on the client side or not.
 	if script.ClassName == "LocalScript" or script.ClassName == "ModuleScript" and game:GetService("Players").LocalPlayer then
 		append("Client: " .. game:GetService("Players").LocalPlayer.Name)
 	elseif script.ClassName == "Script" then
-		append("Server: " .. table.concat(game:GetService("Players"):GetPlayers(),","))
+		-- / So we can give the server some sort of name :/
+		-- / Another quick note. I will make a text file later full of names for the server to pick
+		-- / PLAN Make a list of names, and make a random.seed for the game.JobId's digits and use that to name the server. So if you were to run my script on the same server it will have the same name. And other servers have different names. :3
+		append("Server: " .. game.JobId:gsub("%X",""))
 	end
+	
+	
 	
 	
 	-- / Did both because I can
