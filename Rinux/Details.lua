@@ -13,7 +13,7 @@ local a,err = pcall(function()
 			local o = ""
 			for x=1,24 do
 				for y=1,24 do
-					o = o.."/x\n"
+					o = o.."/x"
 				end
 				o = o.."\n"
 			end
