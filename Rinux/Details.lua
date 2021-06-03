@@ -8,7 +8,7 @@ local a,err = pcall(function()
 
 	-- / Artistic expresion pog?
 	append(
-	[=====[
+		[=====[
 ...................................##@##@@@###............................................................................................................
 .................................##0NAHfKffsHWqNRD&gQBB##...........................##@@#.................................................................
 ................................#@EKIFIIIFFFIIIIIIIIFFUK3NR&QBB#................##BBBBBBB##...............................................................
@@ -70,7 +70,7 @@ local a,err = pcall(function()
 ...............................................#@@@#@@##@@@@@@@@@@@@@#@@@#@@@@@#..........................................................................
 ]=====]
 	)
-	
+
 	--[[ -- / This is a depricated canvas for testing
 	append(
 		(function()
@@ -85,11 +85,11 @@ local a,err = pcall(function()
 		end)()
 	)
 	--]]
-	
-	
-	
-	
-	
+
+
+
+
+
 	-- / Name of the file
 	append("Details.lua")
 	-- / Something to start with
@@ -106,36 +106,36 @@ local a,err = pcall(function()
 				return "Server" -- / Self explanatory
 			elseif script.ClassName == "LocalScript" then
 				return "Client"
-			elseif script.ClassName == "Module" and game:GetService("Players").LocalPlayer
+			elseif script.ClassName == "Module" and game:GetService("Players").LocalPlayer then -- / I want to lynch myself
 				return "Module/Client"
-			else
-				return "Module/Server?"
-			end
-		end)()
-	)
-	-- / This is so it can tell if it it were called on the client side or not.
-	if script.ClassName == "LocalScript" or script.ClassName == "ModuleScript" and game:GetService("Players").LocalPlayer then
-		append("Client: " .. game:GetService("Players").LocalPlayer.Name)
-	else
-		append("Client: " .. table.concat(game:GetService("Players"):GetPlayers(), ","))
-	end
-	-- / So we can give the server some sort of name :/
-	-- / Another quick note. I will make a text file later full of names for the server to pick
-	-- / PLAN Make a list of names, and make a random.seed for the game.JobId's digits and use that to name the server. So if you were to run my script on the same server it will have the same name. And other servers have different names. :3
-	-- / I have modded the code here, so you can get the name of the server without it being ran on it, but since it tells you up above how it's being called it's alright.
-	
-	-- / This is so that server's would have a static name
-	math.seed(game.JobId:gsub("%D","")[1])
-	-- / I only have names of friends because I could not think of anything else
-	local names = {"Casual", "NekO", "Matrix"}
-	append("Server: " .. names[math.random(1,#names)])
-	
-	
-	
-	
-	-- / Did both because I can
-	warn(o[1]) 
-	return o[1]
+				else
+	return "Module/Server?"
+end
+end)()
+)
+-- / This is so it can tell if it it were called on the client side or not.
+if script.ClassName == "LocalScript" or script.ClassName == "ModuleScript" and game:GetService("Players").LocalPlayer then
+	append("Client: " .. game:GetService("Players").LocalPlayer.Name)
+else
+	append("Client: " .. table.concat(game:GetService("Players"):GetPlayers(), ","))
+end
+-- / So we can give the server some sort of name :/
+-- / Another quick note. I will make a text file later full of names for the server to pick
+-- / PLAN Make a list of names, and make a random.seed for the game.JobId's digits and use that to name the server. So if you were to run my script on the same server it will have the same name. And other servers have different names. :3
+-- / I have modded the code here, so you can get the name of the server without it being ran on it, but since it tells you up above how it's being called it's alright.
+
+-- / This is so that server's would have a static name
+math.seed(game.JobId:gsub("%D",""))
+-- / I only have names of friends because I could not think of anything else
+local names = {"Casual", "NekO", "Matrix"}
+append("Server: " .. names[math.random(1,#names)])
+
+
+
+
+-- / Did both because I can
+warn(o[1]) 
+return o[1]
 end)
 
 -- / Like I said, your moms a hoe
