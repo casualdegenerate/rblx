@@ -11,7 +11,7 @@ local a,err = pcall(function()
 	append(
 		(function()
 			local o = ""
-			for x=1,24 do
+			for x=1,64 do
 				for y=1,24 do
 					o = o.."/x"
 				end
