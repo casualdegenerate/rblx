@@ -7,21 +7,6 @@ local a,err = pcall(function()
 	end
 
 	-- / Artistic expresion pog?
-	--[[ -- / This is a depricated canvas for testing
-	append(
-		(function()
-			local o = ""
-			for y=1,24 do
-				for x=1,64 do
-					o = o.."/x"
-				end
-				o = o.."\n"
-			end
-			return o
-		end)()
-	)
-	--]]
-	
 	append(
 	[=====[
 ...................................##@##@@@###............................................................................................................
@@ -86,6 +71,23 @@ local a,err = pcall(function()
 ]=====]
 	)
 	
+	--[[ -- / This is a depricated canvas for testing
+	append(
+		(function()
+			local o = ""
+			for y=1,24 do
+				for x=1,64 do
+					o = o.."/x"
+				end
+				o = o.."\n"
+			end
+			return o
+		end)()
+	)
+	--]]
+	
+	
+	
 	
 	
 	-- / Name of the file
@@ -98,7 +100,17 @@ local a,err = pcall(function()
 	-- / Update note! That depricated property does not even work on game anymore hhhhhh(or it just never did)
 	append("Game data: " .. #game:GetDescendants())
 	-- / This is your execution level. So whatever is running this will be the level, and I'm still trying to understand the game with the tools it gave me. I know I can easily look at it through *other* tools, but this is a lot more fun (i feel like a hakzor man)
-	append("Level: " .. script.ClassName == "Script"and"Server" or script.ClassName == "LocalScript"and"Client" or "Unkown/Module")
+	append("Level: " .. 
+		(function() -- / At least I'm not like some people who make this one line.
+			if script.ClassName == "Script" then
+				return "Server" -- / Self explanatory
+			elseif script.ClassName == "LocalScript" then
+				return "Client"
+			else
+				return "Unkown/Module"
+			end
+		end)()
+	)
 
 
 	-- / Did both because I can
@@ -106,7 +118,7 @@ local a,err = pcall(function()
 	return o[1]
 end)
 
-
+-- / Like I said, your moms a hoe
 if err then
 	warn(err)
 	return err
