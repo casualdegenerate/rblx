@@ -97,7 +97,7 @@ local a,err = pcall(function()
 	-- / People call this a Job Id or Server Id, I'd just call it a GUID or Server GUID
 	append("Server GUID: " .. game.JobId) 
 	-- / This property is depricated I think, but it helps me understand the size of a game, if I were in a slow pace working on it. COUGH COUGH
-	-- / Update note! That depricated property does not even work on game anymore hhhhhh(or it just never did)
+	-- / Update note! (6/2/2021?) That depricated property does not even work on game anymore hhhhhh(or it just never did)
 	append("Game data: " .. #game:GetDescendants())
 	-- / This is your execution level. So whatever is running this will be the level, and I'm still trying to understand the game with the tools it gave me. I know I can easily look at it through *other* tools, but this is a lot more fun (i feel like a hakzor man)
 	append("Level: " .. 
@@ -107,12 +107,18 @@ local a,err = pcall(function()
 			elseif script.ClassName == "LocalScript" then
 				return "Client"
 			else
-				return "Unkown/Module"
+				return "Module/Unkown"
 			end
 		end)()
 	)
-
-
+	
+	if script.ClassName == "LocalScript" or script.ClassName == "ModuleScript" and game:GetService("Players").LocalPlayer then
+		append("Client: " .. game:GetService("Players").LocalPlayer.Name)
+	elseif script.ClassName == "Script" then
+		append("Server: " .. table.concat(game:GetService("Players"):GetPlayers(),","))
+	end
+	
+	
 	-- / Did both because I can
 	warn(o[1]) 
 	return o[1]
