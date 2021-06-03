@@ -125,10 +125,10 @@ local a,err = pcall(function()
 	-- / I have modded the code here, so you can get the name of the server without it being ran on it, but since it tells you up above how it's being called it's alright.
 	
 	-- / This is so that server's would have a static name
-	math.seed(game.JobId:gsub("%D","")[1])
+	math.seed(game.JobId:gsub("%D",""))
 	-- / I only have names of friends because I could not think of anything else
 	local names = {"Casual", "NekO", "Matrix"}
-	append("Server: " .. names[math.random(1,#names))
+	append("Server: " .. names[math.random(1,#names)])
 	
 	
 	
