@@ -106,12 +106,12 @@ local a,err = pcall(function()
 				return "Server" -- / Self explanatory
 			elseif script.ClassName == "LocalScript" then
 				return "Client"
-			elseif script.ClassName == "Module" and game:GetService("Players").LocalPlayer then -- / I want to lynch myself
+			elseif script.ClassName == "ModuleScript" and game:GetService("Players").LocalPlayer then -- / I want to lynch myself
 				return "Module/Client"
-				else
-	return "Module/Server?"
-end
-end)()
+			else
+			return "Module/Server?"
+		end
+	end)()
 )
 -- / This is so it can tell if it it were called on the client side or not.
 if script.ClassName == "LocalScript" or script.ClassName == "ModuleScript" and game:GetService("Players").LocalPlayer then
