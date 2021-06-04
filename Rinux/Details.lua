@@ -117,19 +117,21 @@ end)()
 if script.ClassName == "LocalScript" or script.ClassName == "ModuleScript" and game:GetService("Players").LocalPlayer then
 	append("Client: " .. game:GetService("Players").LocalPlayer.Name)
 else
-	append("Client: " .. table.concat(game:GetService("Players"):GetPlayers(), ","))
+	append("Clients: " .. table.concat(game:GetService("Players"):GetPlayers(), ","))
 end
 -- / So we can give the server some sort of name :/
 -- / Another quick note. I will make a text file later full of names for the server to pick
 -- / PLAN Make a list of names, and make a random.seed for the game.JobId's digits and use that to name the server. So if you were to run my script on the same server it will have the same name. And other servers have different names. :3
 -- / I have modded the code here, so you can get the name of the server without it being ran on it, but since it tells you up above how it's being called it's alright.
 
+--[[
 -- / This is so that server's would have a static name
 math.randomseed(game.JobId:gsub("%D",""))
 -- / I only have names of friends because I could not think of anything else
 local names = {"Casual", "NekO", "Matrix"}
+-- / I depricated it for now :/
 append("Server: " .. names[math.random(1,#names)])
-
+--]]
 
 
 
