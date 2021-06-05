@@ -146,3 +146,4 @@ if err then
 	return err
 end
 
+-- / This script has been closed by me, there will be no further updates to this script.
