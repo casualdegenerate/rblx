@@ -1,16 +1,21 @@
---game:GetService("CoreGui"):WaitForChild("RobloxLoadingGui"):Destroy()
---script.Name = "Main.lua"
+--[[ --
+I don't know what to put here other than hope you can understand what I wrote.
+--]] --
 
-local threads            = {}
-getgenv().connections        = {}
+--game:GetService("CoreGui"):WaitForChild("RobloxLoadingGui"):Destroy() -- / This is a thing, but I'd rather not do it for everything since it will maybe be detected.
+--script.Name = "Main.lua" -- / Sad
 
-local function logfile(content)
+local threads                = {} -- / This is how I run my shit.
+getgenv().connections        = {} -- / So if you wanted to disconnect things I connected onto.
+
+local function logfile(content) -- / This was a method of caching my logging.
 	local file = "cd/Log.txt"
 	if not isfile(file)then
 		writefile(file)
 		repeat wait() until isfile(file)
 	end
 	appendfile(file,content.."\n")
+	printconsole(tostring(content))
 end
 --hookfunction(game:GetService("MarketplaceService").UserOwnsGamePassAsync,logfile)
 ---[[Checks
@@ -444,7 +449,11 @@ threads["AGS Patch"] = coroutine.create(function()
 	fspawn(function()
 		local b=game:GetService("Workspace").Terrain["_Game"].Workspace:WaitForChild("Baseplate",5)
 		if not b then
-			return
+			if game:GetService("Workspace").Terrain:GetChildren()[1] then
+				b = game:GetService("Workspace").Terrain:GetChildren()[1] -- / Got me flushed by that update he did ngl, was really pissed. I mean really pissed, I even talked shit in konekokittens video about the game being non functional.
+			else
+				return
+			end
 		end
 		b.Transparency = 1
 	end)
@@ -616,7 +625,7 @@ threads["AGS Patch"] = coroutine.create(function()
 end)
 
 --
-
+-- / Never gotten to do this yet.
 --[[Cheat Detection
 fspawn(function()
 	if false then 
@@ -627,6 +636,7 @@ fspawn(function()
 end)
 --]]
 
+-- / What
 --[[Rebind
 fspawn(function()
 	getgenv().cd.aa = true
@@ -645,6 +655,7 @@ fspawn(function()
 end)
 --]]
 
+-- / This is somewhat possible with my bot
 --[[Discord Rich PRESCENSE
 fspawn(function()
 	local file = "Dumb Stuff/Info.txt"
@@ -658,6 +669,7 @@ fspawn(function()
 end)
 --]]
 
+-- / Truely sad
 --[[Crystal KEKW (edit: he patched it :sadface:)
 fspawn(function()
 	local CrystalScript
@@ -672,9 +684,9 @@ fspawn(function()
 end)
 --]]
 
-
+-- / I will turn this into a logger later, so pretty much logs everything in game into a file, and since chat does not take enough space I will save even more data about someone on it.
 ---[[Chat Logger
-threads["Chat Logger"] = coroutine.create(function()
+threads["Logger"] = coroutine.create(function()
 	while not game:IsLoaded()do wait()end
 	------------------------------------------------------
 	_G.cLogSettings={
@@ -719,6 +731,7 @@ threads["Chat Logger"] = coroutine.create(function()
 		  local x={}
 		  for i,v in pairs(game:GetService("Players"):GetPlayers())do table.insert(x,'[ '..v.Name..(' '):rep(20):sub(v.Name:len()+1)..'|'..(' '):rep(10):sub(tostring(v.UserId):len()+1)..tostring(v.UserId)..' ]')end
 		  writefile(file,'V1.2\nGame  : '..game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name..'\nGameID: '..tostring(game.PlaceId)..'\nServerID: '..game.JobId..'\nTime  : '..os.date('%Y/%m/%d-%H:%M:%S')..'\n| |  |  | - |  |  | |\nConnected Players:\n'..table.concat(x,'\n')..'\n\n--- [CLog];Start. ---\n')
+		  writefile(file:sub(1,-3).." Avatars.txt","")
 	else
 	end
 	if file == "" then
@@ -767,7 +780,8 @@ threads["Chat Logger"] = coroutine.create(function()
 end)
 --]]
 
----[[Was bored so I killed a few games?
+-- / Sheeeeesh, imagine breaking federal laws.
+--[[Was bored so I killed a few games?
 coroutine.resume(coroutine.create(function()
 repeat wait() until game:IsLoaded()
 repeat wait() until game:GetService("Players").LocalPlayer
@@ -885,8 +899,9 @@ end
 end))
 --]]
 
+-- / I'm a bit proud :sunglasses:
 ---[[Kaderth's Admin House
-threads["Kaderth's Admin House Patch"] = coroutine.create(function()
+threads["Kaderth's Admin House Custom Commands"] = coroutine.create(function()
 	repeat wait() until game:IsLoaded() and game:GetService("Players").LocalPlayer
 	local lplr = game:GetService("Players").LocalPlayer
 	if game.PlaceId ~= 333164326 then return end
@@ -2025,6 +2040,7 @@ threads["Kaderth's Admin House Patch"] = coroutine.create(function()
 end)
 --]]
 
+-- / So I can see people's assets on things I want to know already stored, without the need of api that might change.
 --[[Cache info
 local status,err = pcall(function()
 	local func4=function(a,b)
@@ -2054,6 +2070,7 @@ if not status then
 end
 --]]
 
+-- / A fun project, if you want, just message me for that AHK
 --[=======[AutoHotkey API
 coroutine.resume(coroutine.create(function()
 local rblx = "ahk_exe RobloxPlayerBeta.exe"
@@ -2117,6 +2134,7 @@ WinSet,Transparent,]]..(((int-1)*-1)*255)..','..rblx
 end))
 --]=======]
 
+-- / This is client side cosmetics, I made it so I can feel more pleased by my looks(since I can't change it anymore because of my exploit)
 ---[[Cosmetics
 threads["Cosmetics"] = coroutine.create(function()
 	if game.PlaceId ~= 1068523756 then
@@ -2173,7 +2191,7 @@ threads["Cosmetics"] = coroutine.create(function()
 end)
 --]]
 
-
+-- / This is a patch/modfication to a game that does fun stuff and what I'm currently working on.
 threads["Church Patch"] = coroutine.create(function()
 	if game.PlaceId ~= 1068523756 then
 		return "Wrong game to execute"
@@ -2277,9 +2295,9 @@ threads["Church Patch"] = coroutine.create(function()
 end)
 
 
-
----[[
-for i,v in next, threads do
+-- / This is how I run all my threads, in a place where I can be told if it errors.
+---[[Threads
+for i,v in next, threads do 
 	if type(v) == "thread" then
 		local success, result = coroutine.resume(v)
 		if success then
@@ -2287,6 +2305,8 @@ for i,v in next, threads do
 		else
 			messagebox(result,"ERROR: "..tostring(i),0)
 		end
+	elseif type(v) == "table" then
+		-- / This will be updated later.
 	end
 end
 --]]
