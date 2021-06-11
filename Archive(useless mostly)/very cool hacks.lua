@@ -1,3 +1,4 @@
+if not syn then return end
 local gui = Instance.new("ScreenGui")
 local s = Instance.new("VideoFrame",gui)
 syn.protect_gui(gui)
