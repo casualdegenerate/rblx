@@ -148,6 +148,10 @@ threads["Client COM Manipulation"] = coroutine.create(function()
 	  "Chatted",
 	  "MessagePosted"
 	}
+	local chat_remotes1 = {
+		"SayMessageRequest",
+		"MessagePosted"
+	}
 	local mt = getrawmetatable(game) make_writeable(mt) local old = mt.__namecall
 	mt.__namecall = newcclosure(function(self,...)
 		local args = {...} 
@@ -224,13 +228,13 @@ threads["Client COM Manipulation"] = coroutine.create(function()
 		
 		
 		if game.PlaceId ~= 2000062521 and true then
-			if self.Name == "MessagePosted" and not args[1]:find("+rc") and chatbypass and not args[1]:sub(1,1)==":" then
-				--logfile('0[DEBUG]: disallow messpost')
-				return
-			end
-			if self.Name == "SayMessageRequest" and args[1]:find("+rc")or self.Name == "SayMessageRequest" and args[1]:sub(1,1)==":" then
-				--logfile("0[DEBUG]: disallow sayreq")
-				return
+			for i,v in next, chat_remotes1 do
+				if self.Name == v then
+					if args[1]:sub(1,1)==":"or args[1]:sub(1,1)==";" then
+						logfile("0[DEBUG]: disallow " .. v)
+						return
+					end
+				end
 			end
 		end
 		
@@ -286,7 +290,7 @@ if getgenv then
 	end
 	getgenv().tchat = function(input)
 		fchat(input)
-		tchat(input)
+		rchat(input)
 	end
 	--This is proof you are using my library(do you like the way I worded that >3<)
 	getgenv().is_cd_caller = function()
@@ -317,34 +321,38 @@ end)
 --
 
 --afk.lua
-threads["afk.lua"] = coroutine.create(function()
-	repeat wait() until game:IsLoaded()
-	local var1 = false
-	local games1 = {115670532,112420803}
-	local s1 = "."
-	game:GetService("UserInputService").WindowFocused:Connect(function()
-		for _,id in pairs(games1) do
-			if game.PlaceId == id then
-				var1 = false
+threads["afk.lua"] = {
+	["Active"] = false,
+	["Thread"] = coroutine.create(function()
+		repeat wait() until game:IsLoaded()
+		local var1 = false
+		local games1 = {115670532,112420803}
+		local s1 = "."
+		game:GetService("UserInputService").WindowFocused:Connect(function()
+			for _,id in pairs(games1) do
+				if game.PlaceId == id then
+					var1 = false
+				end
 			end
-		end
-	end)
-	game:GetService("UserInputService").WindowFocusReleased:Connect(function()
-		var1 = true
-		for _,id in pairs(games1) do
-			if game.PlaceId == id then
-				while var1 do
-					for i=1,3 do
-						game.Players:Chat('name me Loading'..s1:rep(i))
-						if not var1 then break end --yes
-					wait(1)end
-				wait()end
-				wait(1)
-				rchat("unname me")
+		end)
+		game:GetService("UserInputService").WindowFocusReleased:Connect(function()
+			var1 = true
+			for _,id in pairs(games1) do
+				if game.PlaceId == id then
+					while var1 do
+						for i=1,3 do
+							game.Players:Chat('name me Loading'..s1:rep(i))
+							if not var1 then break end --yes
+						wait(1)end
+						fwait()
+					end
+					wait(1)
+					rchat("unname me")
+				end
 			end
-		end
+		end)
 	end)
-end)
+}
 
 --
 
@@ -2199,6 +2207,16 @@ threads["Church Patch"] = coroutine.create(function()
 	repeat wait() until game:GetService("Players").LocalPlayer
 	local plr = game:GetService("Players").LocalPlayer 
 	
+	fspawn(function()
+		-- / Remove patches (stuff I don't want rn)
+		local L_T_1 = {workspace:WaitForChild("CORE"):WaitForChild("verb"):WaitForChild("key"):WaitForChild("out"):WaitForChild("TouchInterest"),workspace:WaitForChild("CORE"):WaitForChild("Main"):WaitForChild("tp"):WaitForChild("Part"):WaitForChild("TouchInterest")}
+		
+		for i, v in next, L_T_1 do
+			v:Destroy()
+		end
+	end)
+	
+	
 	local func1 = function(chr)
 		local head = chr:WaitForChild("Head",tonumber'inf')
 		local tag = head:WaitForChild("NameTag",tonumber'inf')
@@ -2233,7 +2251,7 @@ threads["Church Patch"] = coroutine.create(function()
 	local commands = {}
 	commands = {
 		["info"] = {
-			["Level"] = 5,
+			["Level"] = 0,
 			["Fire"] = function(tbl)
 				if not tbl["rawObjectMessage"] then
 					return "No message?"
@@ -2252,7 +2270,43 @@ threads["Church Patch"] = coroutine.create(function()
 				fchat(output)
 				return output
 			end,
-		}
+		},
+		["tools"] = {
+			["Level"] = 5,
+			["Fire"] = function(tbl)
+				if not tbl["rawObjectMessage"] then
+					return "No message?"
+				end
+				
+				
+				
+				
+			end
+		},
+		["outfit"] = {
+			["Level"] = 6,
+			["Fire"] = function(tbl)
+				local c1,c2,c3 = "No message?", "No arguments?", "No file found by that outfit name?"
+				
+				if not tbl["rawObjectMessage"] then
+					return c1
+				end
+				if not tbl["Arguments"] then
+					return c2
+				end
+				local file = "cd/Outfits/" .. tbl["Arguments"][2] .. '.cd'
+				if not isfile(file) then
+					return c3 .. ' ' .. file
+				end
+				local module = loadstring(readfile(file))() -- / Should return a table and do nothing much
+				print(module.shirt,module.pants)
+				rchat("!shirt " .. module.shirt)wait(1)
+				rchat("!pants " .. module.pants)
+				
+				
+				
+			end
+		},
 	}
 	
 	local level = function(player)
@@ -2262,7 +2316,7 @@ threads["Church Patch"] = coroutine.create(function()
 		if table.find(admins,player.UserId and player.Name) then
 			return 4
 		end
-		return 0 -- / Set to -1 for nothing.
+		return -1 -- / Set to -1 for nothing.
 	end
 	
 	local func2 = function(player)
@@ -2292,6 +2346,7 @@ threads["Church Patch"] = coroutine.create(function()
 	end
 	
 	
+	
 end)
 
 
@@ -2306,7 +2361,17 @@ for i,v in next, threads do
 			messagebox(result,"ERROR: "..tostring(i),0)
 		end
 	elseif type(v) == "table" then
-		-- / This will be updated later.
+		---[[ / This will be updated later.
+	
+		if v["Thread"] and v["Active"] then
+			local success, result = coroutine.resume(v["Thread"])
+			if success then
+				printconsole("Running "..tostring(i))
+			else
+				messagebox(result,"ERROR: "..tostring(i),0)
+			end
+		end
+		--]]
 	end
 end
 --]]
