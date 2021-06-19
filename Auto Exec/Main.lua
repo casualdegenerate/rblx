@@ -17,6 +17,22 @@ local function logfile(content) -- / This was a method of caching my logging.
 	appendfile(file,content.."\n")
 	printconsole(tostring(content))
 end
+
+--[[
+local function recursiveTbl(tbl)
+	if type(tbl) == "table" then
+		recursiveTbl(tbl)
+	else
+		return tbl
+	end
+end
+--]]
+
+--local function print(...)
+--	local str = recursiveTbl({...})
+--	printconsole(tostring(str))
+--end
+
 --hookfunction(game:GetService("MarketplaceService").UserOwnsGamePassAsync,logfile)
 ---[[Checks
 --local status,err = pcall(function()
@@ -149,11 +165,15 @@ threads["Client COM Manipulation"] = coroutine.create(function()
 	  "MessagePosted"
 	}
 	local chat_remotes1 = {
-		"SayMessageRequest",
-		"MessagePosted"
+		"SayMessageRequest"
 	}
 	local mt = getrawmetatable(game) make_writeable(mt) local old = mt.__namecall
 	mt.__namecall = newcclosure(function(self,...)
+	
+		if self.Name == "MessagePosted" then
+			_G.MessagePosted = self
+		end
+	
 		local args = {...} 
 		local m = getnamecallmethod() 
 		if game.PlaceId == 3907722122 then
@@ -256,6 +276,16 @@ end
 --]]
 --EXTERNAL LUAU
 if getgenv then
+
+	-- // SERVICES
+	
+	getgenv().Players = game:GetService("Players")
+	getgenv().FirstReplicated = nil
+	
+	
+	
+	-- // #############
+
 	--Easy to write coroutine.
 	getgenv().fspawn = function(f)
 		coroutine.wrap(f) -- / 5.24.2021 Doing a wrap might work better?
@@ -296,6 +326,22 @@ if getgenv then
 	getgenv().is_cd_caller = function()
 		return true
 	end
+	
+	-- / This is WaitFor it's a form of WaitForChild() that will only take strings of code and convert them to wait for each instance.
+	getgenv().WaitFor = function(objectString)
+		splits = objectString:split(".")
+		local out = splits[1]
+		for i,v in next, splits do
+			if i~=1 then out = out .. ":WaitForChild('" .. v .. "')" end
+		end
+		return out
+	end
+	
+	-- / Rejoin
+	getgenv().Rejoin = function()
+		game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId)
+	end
+
 end
 ]=====])()
 
@@ -2284,7 +2330,7 @@ threads["Church Patch"] = coroutine.create(function()
 			end
 		},
 		["outfit"] = {
-			["Level"] = 6,
+			["Level"] = 5,
 			["Fire"] = function(tbl)
 				local c1,c2,c3 = "No message?", "No arguments?", "No file found by that outfit name?"
 				
@@ -2298,12 +2344,18 @@ threads["Church Patch"] = coroutine.create(function()
 				if not isfile(file) then
 					return c3 .. ' ' .. file
 				end
-				local module = loadstring(readfile(file))() -- / Should return a table and do nothing much
+				local module = loadstring(readfile(file):lower())() -- / Should return a table and do nothing much
 				print(module.shirt,module.pants)
-				rchat("!shirt " .. module.shirt)wait(1)
-				rchat("!pants " .. module.pants)
+				
+				print(_G.MessagePosted,type(_G.MessagePosted),_G.MessagePosted.ClassName)
+				print('loc',_G.MessagePosted:GetFullName())
+				
+				for i,connect in next, getconnections(_G.MessagePosted.Event) do
+					print(i,decompile(connect.Function))
+				end
 				
 				
+				return _G.MessagePosted
 				
 			end
 		},
@@ -2348,6 +2400,15 @@ threads["Church Patch"] = coroutine.create(function()
 	
 	
 end)
+
+-- / This is a patch to the low FPS my PC get's from this game... More of me wanting to save my data on my settings...
+threads["Stay-Alive(macalads) Patch"] = coroutine.create(function()
+	repeat wait() until game:IsLoaded() and game:GetService("Players").LocalPlayer
+	local button = loadstring('return ' .. game:GetService("Players").LocalPlayer:GetFullName() .. WaitFor('.PlayerGui.GlobalGui.SettingsPage.MainFrame.ToggleLDM'))()
+	repeat wait() until #getconnections(button.MouseButton1Down) > 0
+	getconnections(button.MouseButton1Down)[1]:Fire()
+end)
+
 
 
 -- / This is how I run all my threads, in a place where I can be told if it errors.
