@@ -561,28 +561,22 @@ threads["AGS Patch"] = coroutine.create(function()
 				end)
 				for _,v in pairs(player.Character:GetChildren()) do
 					if v.Name == "VampireVanquisher" then
-						for i = 1,5 do
-							rchat("ungear all robot.txt")
-							wait()
-						end
+						rchat("ungear all robot.txt")
+						rchat("reload all")
 					end
 				end
 			end
 			player.CharacterAdded:connect(function(c)
 				c.ChildAdded:connect(function(a)
 					if a.Name == "VampireVanquisher" then
-						for i = 1,5 do
-							rchat("ungear all robot.txt")
-							wait()
-						end
+						rchat("ungear all robot.txt")
+						rchat("reload all")
 					end
 				end)
 				player.Backpack.ChildAdded:connect(function(t)
 					if t.Name == "VampireVanquisher" then
-						for i = 1,5 do
-							rchat("ungear all robot.txt")
-							wait()
-						end
+						rchat("ungear all robot.txt")
+						rchat("reload all")
 					end
 				end)
 			end)
@@ -591,20 +585,16 @@ threads["AGS Patch"] = coroutine.create(function()
 			if player.Character then
 				player.Character.ChildAdded:connect(function(a)
 					if a.Name == "ice" then
-						for i = 1,5 do
-							rchat("reload all")
-							wait()
-						end
+						rchat("reload all")
+						rchat("clr")
 					end
 				end)
 			end
 			player.CharacterAdded:connect(function(c)
 				c.ChildAdded:connect(function(a)
 					if a.Name == "ice" then
-						for i = 1,5 do
-							rchat("reload all")
-							wait()
-						end
+						rchat("reload all")
+						rchat("clr")
 					end
 				end)
 			end)
@@ -617,6 +607,7 @@ threads["AGS Patch"] = coroutine.create(function()
 			if c.ClassName==("Tool") then
 				if c.Name == "VampireVanquisher" then
 					rchat("Clear robot.txt")
+					rchat("reload all")
 				end
 			end
 		end)
@@ -625,7 +616,7 @@ threads["AGS Patch"] = coroutine.create(function()
 			AntiVamp(v)
 		end
 	end)
-	fspawn(function()
+	--[[fspawn(function()
 		local Disco = Instance.new("Folder",game:GetService("Workspace"))
 		Disco.Name = "Baseplatev3"
 		local xm = 100
@@ -649,16 +640,7 @@ threads["AGS Patch"] = coroutine.create(function()
 				p.Parent = Disco
 			end
 		end
-		repeat wait() until game:GetService("Workspace"):FindFirstChild("Terrain")
-		repeat wait() until game:GetService("Workspace").Terrain:FindFirstChild("_Game")
-		while true do 
-			if game:GetService("Workspace").Terrain._Game.Workspace:FindFirstChild("Baseplate") then 
-				game:GetService("Workspace").Terrain._Game.Workspace.Baseplate:Destroy()
-			else
-				break
-			end
-		fwait()end
-	end)
+	end)--]]
 	fspawn(function()
 		repeat wait() until game:GetService("CoreGui"):FindFirstChild("RobloxLoadingGui")
 		game:GetService("CoreGui").RobloxLoadingGui:Destroy()
@@ -774,6 +756,7 @@ end)
 
 -- / I will turn this into a logger later, so pretty much logs everything in game into a file, and since chat does not take enough space I will save even more data about someone on it.
 -- / I've updated the logger to be AGS friendly, so if someone uses a music visualizer it won't prevent them from being logged.(.Chatted is no longer being logged!)
+-- / I FORKED THIS CHAT LOGGER FROM NekO#1337 [699357570015559680]
 ---[[Chat Logger
 threads["Logger"] = coroutine.create(function()
 	while not game:IsLoaded()do wait()end
@@ -2238,9 +2221,9 @@ end))
 -- / This is client side cosmetics, I made it so I can feel more pleased by my looks(since I can't change it anymore because of my exploit)
 ---[[Cosmetics
 threads["Cosmetics"] = coroutine.create(function()
-	if game.PlaceId ~= 1068523756 and game.PlaceId ~= 115670532 and game.PlaceId ~= 112420803 then
+	--[[if game.PlaceId ~= 1068523756 and game.PlaceId ~= 115670532 and game.PlaceId ~= 112420803 then
 		return "Not allowed to run."
-	end
+	end --It can run in other places I guess :/ hope no bans from it.]]
 	if not _G.CDENV then _G.CDENV = {
 		cosmetic = true
 	}
@@ -2495,6 +2478,7 @@ end)
 threads["Roblox Patch"] = {
 	["Active"] = true,
 	["Thread"] = coroutine.create(function()
+		repeat wait() until setfps
 		local focusedfps = 69.5
 		local unfocusedfps = 5
 		setfps(focusedfps)
