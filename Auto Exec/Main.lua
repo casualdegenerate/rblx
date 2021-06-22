@@ -350,7 +350,10 @@ if getgenv then
 	end
 	
 	-- / FPSCAP
-	getgenv().setfps = setfpscap
+	fspawn(function()
+		repeat wait() until a385
+		getgenv().setfps = setfpscap
+	end)
 	
 	
 	
@@ -2481,6 +2484,7 @@ threads["SynX Patch"] = coroutine.create(function()
 			__setfpscap(int)
 		end
 	end)
+	getgenv().a385 = true
 	--]]
 	
 	
