@@ -281,14 +281,14 @@ if getgenv then
 	
 	getgenv().Players = game:GetService("Players")
 	getgenv().FirstReplicated = nil
-	
+	getgenv().UIS = game:GetService("UserInputService")
 	
 	
 	-- // #############
 
 	--Easy to write coroutine.
 	getgenv().fspawn = function(f)
-		coroutine.wrap(f) -- / 5.24.2021 Doing a wrap might work better?
+		coroutine.wrap(f)() -- / 5.24.2021 Doing a wrap might work better?
 	end
 	--Easy to write frame wait.
 	getgenv().fwait=function()
@@ -316,6 +316,8 @@ if getgenv then
 			_G.owoToggle = false
 			game:GetService("Players"):Chat(input) 
 			_G.owoToggle = true
+		else
+			game:GetService("Players"):Chat(input)
 		end
 	end
 	getgenv().tchat = function(input)
@@ -341,7 +343,17 @@ if getgenv then
 	getgenv().Rejoin = function()
 		game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId)
 	end
-
+	
+	-- / Disable Rendering
+	getgenv().NoRender = function()
+		game:GetService("RunService"):Set3dRenderingEnabled(false)
+	end
+	
+	-- / FPSCAP
+	getgenv().setfps = setfpscap
+	
+	
+	
 end
 ]=====])()
 
@@ -499,7 +511,6 @@ end
 threads["AGS Patch"] = coroutine.create(function()
 	repeat wait() until game:IsLoaded()
 	if game.PlaceId ~= 115670532 and game.PlaceId ~= 112420803 then return end
-	repeat wait()until fwait
 	fspawn(function()
 		local b=game:GetService("Workspace").Terrain["_Game"].Workspace:WaitForChild("Baseplate",5)
 		if not b then
@@ -540,11 +551,7 @@ threads["AGS Patch"] = coroutine.create(function()
 				player.Character.ChildAdded:connect(function(a)
 					if a.Name == "VampireVanquisher" then
 						for i = 1,5 do
-							if not HasMemeName(player) then
-								rchat('ungear '..player.Name.." robot.txt")
-							else
-								rchat("ungear all robot.txt")
-							end
+							rchat("ungear all robot.txt")
 							wait()
 						end
 					end
@@ -552,11 +559,7 @@ threads["AGS Patch"] = coroutine.create(function()
 				for _,v in pairs(player.Character:GetChildren()) do
 					if v.Name == "VampireVanquisher" then
 						for i = 1,5 do
-							if not HasMemeName(player) then
-								rchat('ungear '..player.Name.." robot.txt")
-							else
-								rchat("ungear all robot.txt")
-							end
+							rchat("ungear all robot.txt")
 							wait()
 						end
 					end
@@ -566,11 +569,7 @@ threads["AGS Patch"] = coroutine.create(function()
 				c.ChildAdded:connect(function(a)
 					if a.Name == "VampireVanquisher" then
 						for i = 1,5 do
-							if not HasMemeName(player) then
-								rchat('ungear '..player.Name.." robot.txt")
-							else
-								rchat("ungear all robot.txt")
-							end
+							rchat("ungear all robot.txt")
 							wait()
 						end
 					end
@@ -578,11 +577,7 @@ threads["AGS Patch"] = coroutine.create(function()
 				player.Backpack.ChildAdded:connect(function(t)
 					if t.Name == "VampireVanquisher" then
 						for i = 1,5 do
-							if not HasMemeName(player) then
-								rchat('ungear '..player.Name.." robot.txt")
-							else
-								rchat("ungear all robot.txt")
-							end
+							rchat("ungear all robot.txt")
 							wait()
 						end
 					end
@@ -594,11 +589,7 @@ threads["AGS Patch"] = coroutine.create(function()
 				player.Character.ChildAdded:connect(function(a)
 					if a.Name == "ice" then
 						for i = 1,5 do
-							if not HasMemeName(player) then
-								rchat('reload '..player.Name)
-							else
-								rchat("reload all")
-							end
+							rchat("reload all")
 							wait()
 						end
 					end
@@ -608,11 +599,7 @@ threads["AGS Patch"] = coroutine.create(function()
 				c.ChildAdded:connect(function(a)
 					if a.Name == "ice" then
 						for i = 1,5 do
-							if not HasMemeName(player) then
-								rchat('reload '..player.Name)
-							else
-								rchat("reload all")
-							end
+							rchat("reload all")
 							wait()
 						end
 					end
@@ -674,8 +661,52 @@ threads["AGS Patch"] = coroutine.create(function()
 		game:GetService("CoreGui").RobloxLoadingGui:Destroy()
 	end)
 	fspawn(function()
-		game:GetService("UserInputService").MouseDeltaSensitivity = 1
+		--game:GetService("UserInputService").MouseDeltaSensitivity = .5
 	end)
+	fspawn(function()
+		local debounce = false
+        local ui = game:GetService("UserInputService")
+        local l__ContextActionService__7 = game:GetService("ContextActionService");
+        local l__RunService__1 = game:GetService('RunService')
+        spawn(function()
+            l__RunService__1:UnbindFromRenderStep("ShoulderCameraUpdate");
+        end)
+        spawn(function()
+            l__ContextActionService__7:UnbindAction("ShoulderCameraZoom");
+        end)
+        spawn(function()
+            l__ContextActionService__7:UnbindAction("ShoulderCameraSprint");
+        end)
+        while true do
+            repeat fwait() until game.Workspace.CurrentCamera.CameraType == Enum.CameraType.Scriptable
+            l__RunService__1:UnbindFromRenderStep("ShoulderCameraUpdate");
+            l__ContextActionService__7:UnbindAction("ShoulderCameraZoom");
+            l__ContextActionService__7:UnbindAction("ShoulderCameraSprint");
+            local wepsys = game:GetService("ReplicatedStorage"):FindFirstChild('WeaponsSystem')
+            if not wepsys then return end
+			if not debounce then printconsole("Shift lock detected!") end
+			debounce = true
+            for i,v in pairs(wepsys:GetDescendants()) do
+                if v:IsA("Script") then
+                    v.Disabled = true
+                end
+                v:Destroy()
+            end
+            local wep = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("ClientWeaponsScript")
+            local gui = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("WeaponsSystemGui")
+            local sc = game:GetService("Players").LocalPlayer.PlayerScripts:FindFirstChild("ClientWeaponsScript")
+            if wep then wep.Disabled = true wep:Destroy() end
+            if gui then gui:Destroy() end
+            if sc then
+                sc.Disabled = true
+                sc:Destroy()
+            end
+            ui.MouseIconEnabled = true
+            game.Workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
+            game.Workspace.CurrentCamera.CameraSubject = game:GetService("Players").LocalPlayer.Character.Humanoid
+            game:GetService("Players").LocalPlayer.Character.Humanoid.AutoRotate = true
+        end
+    end)
 end)
 
 --
@@ -739,6 +770,7 @@ end)
 --]]
 
 -- / I will turn this into a logger later, so pretty much logs everything in game into a file, and since chat does not take enough space I will save even more data about someone on it.
+-- / I've updated the logger to be AGS friendly, so if someone uses a music visualizer it won't prevent them from being logged.(.Chatted is no longer being logged!)
 ---[[Chat Logger
 threads["Logger"] = coroutine.create(function()
 	while not game:IsLoaded()do wait()end
@@ -784,8 +816,8 @@ threads["Logger"] = coroutine.create(function()
 		if not isfile(file) then createFile(file) end
 		  local x={}
 		  for i,v in pairs(game:GetService("Players"):GetPlayers())do table.insert(x,'[ '..v.Name..(' '):rep(20):sub(v.Name:len()+1)..'|'..(' '):rep(10):sub(tostring(v.UserId):len()+1)..tostring(v.UserId)..' ]')end
-		  writefile(file,'V1.2\nGame  : '..game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name..'\nGameID: '..tostring(game.PlaceId)..'\nServerID: '..game.JobId..'\nTime  : '..os.date('%Y/%m/%d-%H:%M:%S')..'\n| |  |  | - |  |  | |\nConnected Players:\n'..table.concat(x,'\n')..'\n\n--- [CLog];Start. ---\n')
-		  writefile(file:sub(1,-3).." Avatars.txt","")
+		  writefile(file,'V1.3 AGS Friendly!\nGame  : '..game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name..'\nGameID: '..tostring(game.PlaceId)..'\nServerID: '..game.JobId..'\nTime  : '..os.date('%Y/%m/%d-%H:%M:%S')..'\n| |  |  | - |  |  | |\nConnected Players:\n'..table.concat(x,'\n')..'\n\n--- [CLog];Start. ---\n')
+		  --writefile(file:sub(1,-3).." Avatars.txt","")
 	else
 	end
 	if file == "" then
@@ -810,27 +842,35 @@ threads["Logger"] = coroutine.create(function()
 			end
 		end)
 	end
+	--[[
 	for _,plr in pairs(game.Players:GetChildren())do
 		func2(plr)
 	end
+	--]]
 	game:GetService('Players').PlayerAdded:Connect(function(plr)
 		local userSaid='['..plr.Name..(' '):rep(20):sub(plr.Name:len()+1)..'|'..(' '):rep(10):sub(tostring(plr.UserId):len()+1)..tostring(plr.UserId)..']--'
 		appendfile(file,'\n{'..os.date('%Y/%m/%d-%H:%M:%S')..'} # '..userSaid..'(Connected)')
-		func2(plr)
+		--func2(plr)
 	end)
+	
 	game:GetService('Players').PlayerRemoving:Connect(function(plr)
 		if plr.Name==localPlrName and activeConnected then activeConnected=false
 			local userSaid='['..plr.Name..(' '):rep(20):sub(plr.Name:len()+1)..'|'..(' '):rep(10):sub(tostring(plr.UserId):len()+1)..tostring(plr.UserId)..']--'
 			appendfile(file,'\n{'..os.date('%Y/%m/%d-%H:%M:%S')..'} # '..userSaid..'(Disconnected)')
 			wait(_G.cLogSettings.holdFor)
-			if not game:GetService('Players'):FindFirstChild(plr.Name)then
-				AntiSpam[tostring(plr.UserId)]=nil
-			end
+			--if not game:GetService('Players'):FindFirstChild(plr.Name)then
+			--	AntiSpam[tostring(plr.UserId)]=nil
+			--end
 		end
 		if not activeConnected and not saidLeave then saidLeave=true
 			appendfile(file,'\n\n-- [CLog];Stopped. --\n\nTime: '..os.date('%Y/%m/%d-%H:%M:%S'))
 		end
 	end)
+	game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.OnMessageDoneFiltering.OnClientEvent:Connect(function(d)
+		local userSaid='['..d.FromSpeaker..'|'..tostring(d.SpeakerUserId)..']: 'userSaid=(' '):rep(34):sub(userSaid:len()+1)..userSaid
+		appendfile(file,'\n{'..os.date('%Y/%m/%d-%H:%M:%S')..'} # '..userSaid..d.Message:gsub('[\n\r]','\\n'))
+	end)
+	
 end)
 --]]
 
@@ -954,6 +994,7 @@ end))
 --]]
 
 -- / I'm a bit proud :sunglasses:
+-- / It's another cmds.lua for Kaderth's, but mostly passive.
 ---[[Kaderth's Admin House
 threads["Kaderth's Admin House Custom Commands"] = coroutine.create(function()
 	repeat wait() until game:IsLoaded() and game:GetService("Players").LocalPlayer
@@ -1958,6 +1999,7 @@ threads["Kaderth's Admin House Custom Commands"] = coroutine.create(function()
 			["outfit"] = {
 				description = "Set's cd/Outfits/<args[2]>.cd as your outfit.",
 				funk = function(msg)
+					local commandOut = "" -- since adonis is nice :)
 					if not lplr.Character then
 						rconsoleprint("WARNING: No character found","@@YELLOW@@")
 						return
@@ -1967,8 +2009,7 @@ threads["Kaderth's Admin House Custom Commands"] = coroutine.create(function()
 						return
 					end
 					local rchat = function(i)
-						rchat(i)
-						wait(.8)
+						commandOut = commandOut .. i .. "|" -- :)
 					end
 					local args = msg:lower():split(" ")
 					local input = tostring(args[2])
@@ -1990,7 +2031,7 @@ threads["Kaderth's Admin House Custom Commands"] = coroutine.create(function()
 					end
 					for _,v in pairs(args) do
 						if v:find("+e") then
-							rchat(":removehats me|")
+							rchat(":removehats me")
 							for i,v in pairs(lplr.Character:GetChildren()) do
 								if v.ClassName=='Shirt'or v.ClassName=='Pants'then
 									v:Destroy()
@@ -2014,6 +2055,9 @@ threads["Kaderth's Admin House Custom Commands"] = coroutine.create(function()
 					if Outfit.Creator then 
 						rchat(":h "..Outfit.Creator)
 					end --if you wanted to give credit
+					
+					
+					
 					for _,v in pairs(lplr.Character:GetDescendants()) do
 						if v.Name == "face" and v.ClassName==("Decal") then
 							i=i+1
@@ -2191,7 +2235,7 @@ end))
 -- / This is client side cosmetics, I made it so I can feel more pleased by my looks(since I can't change it anymore because of my exploit)
 ---[[Cosmetics
 threads["Cosmetics"] = coroutine.create(function()
-	if game.PlaceId ~= 1068523756 then
+	if game.PlaceId ~= 1068523756 and game.PlaceId ~= 115670532 and game.PlaceId ~= 112420803 then
 		return "Not allowed to run."
 	end
 	if not _G.CDENV then _G.CDENV = {
@@ -2409,7 +2453,57 @@ threads["Stay-Alive(macalads) Patch"] = coroutine.create(function()
 	getconnections(button.MouseButton1Down)[1]:Fire()
 end)
 
+-- / This is just incase some shithead runs fucky stuff on my client. I'd rather be safe.
+threads["SynX Patch"] = coroutine.create(function()
+	
+	-- / File exploits I don't want running...
+	getgenv().delfolder = newcclosure(function(...)
+		error("Tried to delete folder\t" .. (...) .. "\t" .. debug.traceback())
+	end)
+	
+	getgenv().delfile = newcclosure(function(...)
+		error("Tried to delete file\t" .. (...) .. "\t" .. debug.traceback())
+	end)
+	
+	
+	-- / Macro exploits I don't want to run.
+	getgenv().mouse1click = newcclosure(function(...)
+		error("mouse1click\t"..debug.traceback())
+	end)
+	
+	
+	---[[ / Functions that can crash(Not needed, but I'd rather not fuck myself over, and rather tell myself I'm fucking up.)
+	local __setfpscap = setfpscap
+	getgenv().setfpscap = newcclosure(function(int)
+		if int < 1 then
+			error("setfpscap is less than 0.01!\t" .. debug.traceback())
+		else
+			__setfpscap(int)
+		end
+	end)
+	--]]
+	
+	
+	
+end)
 
+-- / This patch will just be stuff to help the client so turning FPS down if they are tabbed out, or not active for certain amount of time.
+threads["Roblox Patch"] = {
+	["Active"] = true,
+	["Thread"] = coroutine.create(function()
+		local focusedfps = 69.5
+		local unfocusedfps = 5
+		setfps(focusedfps)
+		
+		UIS.WindowFocused:Connect(function()
+			setfps(focusedfps)
+		end)
+		
+		UIS.WindowFocusReleased:Connect(function()
+			setfps(unfocusedfps)
+		end)
+	end)
+}
 
 -- / This is how I run all my threads, in a place where I can be told if it errors.
 ---[[Threads
@@ -2436,3 +2530,24 @@ for i,v in next, threads do
 	end
 end
 --]]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- Just some lines so I can still look in the middle of my screen to edit code that is down here.
