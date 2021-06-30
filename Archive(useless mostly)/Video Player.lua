@@ -2,7 +2,7 @@ if not syn or #game:GetChildren() < 50 then return end
 local gui = Instance.new("ScreenGui")
 local s = Instance.new("VideoFrame",gui)
 syn.protect_gui(gui)
-local data = game:HttpGet("https://webm.red/view/KOhW.webm")
+local data = syn.request({Url = "https://s1.webmshare.com/dPQRx.webm", Method = "GET"}).Body
 writefile("hack.webm",data)
 s.Video = getsynasset('hack.webm')
 s.Volume = 10
