@@ -2824,7 +2824,7 @@ threads["Roblox Patch"] = {
 
 -- / This is for you to join ;)
 threads["Join plzplzplzplz"] = {
-	["Active"] = false,
+	["Active"] = true,
 	["Thread"] = coroutine.create(function()
 		local invite = "pZVMHtbZ6y"
 		setclipboard(invite)
