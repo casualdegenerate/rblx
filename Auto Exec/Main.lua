@@ -107,6 +107,11 @@ end)
 
 --]]
 
+-- Binds
+
+getgenv().bind = Instance.new("BindableEvent")
+
+
 --Meat table
 
 threads["Client COM Manipulation"] = coroutine.create(function()
@@ -169,11 +174,6 @@ threads["Client COM Manipulation"] = coroutine.create(function()
 	}
 	local mt = getrawmetatable(game) make_writeable(mt) local old = mt.__namecall
 	mt.__namecall = newcclosure(function(self,...)
-	
-		if self.Name == "MessagePosted" then
-			_G.MessagePosted = self
-		end
-	
 		local args = {...} 
 		local m = getnamecallmethod() 
 		if game.PlaceId == 3907722122 then
@@ -248,9 +248,10 @@ threads["Client COM Manipulation"] = coroutine.create(function()
 		
 		
 		if game.PlaceId ~= 2000062521 and true then
-			for i,v in next, chat_remotes1 do
+			for i,v in next, chat_remotes do
 				if self.Name == v then
 					if args[1]:sub(1,1)==":"or args[1]:sub(1,1)==";" then
+						if self.Name==chat_remotes[1] then bind:Fire(args[1])end
 						logfile("0[DEBUG]: disallow " .. v)
 						return
 					end
@@ -311,7 +312,7 @@ end
 	end
 	--This is the say request remote and won't fire any .Chatted connections. So pretty much most basic admin scripts(This includes chat loggers).
 	getgenv().fchat = function(input)
-		game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(input,"All")
+	game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(input,"All")
 	end
 	--Real chat(works in vanilla games that don't mess with the .Chatted or say request remote.
 	getgenv().rchat = function(input)
@@ -362,9 +363,13 @@ end
 		getgenv().setfps = setfpscap
 	end)
 	
+	-- / Better name
 	getgenv().nc = newcclosure
 	
-end
+	-- / JSONDecode
+	getgenv().JSOND = function(a)return game:GetService("HttpService"):JSONDecode(a)end
+	
+--end
 ]=====])()
 
 -- / The "API shit above" is no longer http so I don't need to wait :)
@@ -376,7 +381,7 @@ end
 --anti afk.lua
 threads["Anti AFK"] = {
 	["Active"] = true,
-	["Thread"] = coroutine.create(nc(function()
+	["Thread"] = coroutine.create(function()
 		repeat wait() until game:IsLoaded()
 		repeat wait() until game:GetService("Players").LocalPlayer
 
@@ -386,7 +391,7 @@ threads["Anti AFK"] = {
 		   wait(1)
 		   vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
 		end)
-	end))
+	end)
 }
 
 --
@@ -394,7 +399,7 @@ threads["Anti AFK"] = {
 --afk.lua
 threads["afk.lua"] = {
 	["Active"] = false,
-	["Thread"] = coroutine.create(nc(function()
+	["Thread"] = coroutine.create(function()
 		repeat wait() until game:IsLoaded()
 		local var1 = false
 		local games1 = {115670532,112420803}
@@ -422,7 +427,7 @@ threads["afk.lua"] = {
 				end
 			end
 		end)
-	end))
+	end)
 }
 
 --
@@ -430,7 +435,7 @@ threads["afk.lua"] = {
 ---[[Thumbnail
 threads["Watermark"] = {
 	["Active"] = true,
-	["Thread"] = coroutine.create(nc(function()
+	["Thread"] = coroutine.create(function()
 		repeat wait() until game:IsLoaded()
 		repeat wait() until workspace:FindFirstChild("Camera")
 		if isfolder("CONFIG/Watermark") then
@@ -472,7 +477,7 @@ threads["Watermark"] = {
 		else
 			logfile("0[DEBUG]: No image to use for thumbnail?")
 		end
-	end))
+	end)
 }
 
 --]]
@@ -526,7 +531,7 @@ end
 --Kohl's Main
 threads["AGS Patch"] = {
 	["Active"] = true,
-	["Thread"] = coroutine.create(nc(function()
+	["Thread"] = coroutine.create(function()
 		repeat wait() until game:IsLoaded()
 		if game.PlaceId ~= 115670532 and game.PlaceId ~= 112420803 then return end
 		fspawn(function()
@@ -696,7 +701,7 @@ threads["AGS Patch"] = {
 				game:GetService("Players").LocalPlayer.Character.Humanoid.AutoRotate = true
 			end
 		end)
-	end))
+	end)
 }
 
 --
@@ -765,7 +770,7 @@ end)
 ---[[Chat Logger
 threads["Logger"] = {
 	["Active"] = true,
-	["Thread"] = coroutine.create(nc(function()
+	["Thread"] = coroutine.create(function()
 		while not game:IsLoaded()do wait()end
 		------------------------------------------------------
 		_G.cLogSettings={
@@ -863,7 +868,7 @@ threads["Logger"] = {
 			local userSaid='['..d.FromSpeaker..'|'..tostring(d.SpeakerUserId)..']: 'userSaid=(' '):rep(34):sub(userSaid:len()+1)..userSaid
 			appendfile(file,'\n{'..os.date('%Y/%m/%d-%H:%M:%S')..'} # '..userSaid..d.Message:gsub('[\n\r]','\\n'))
 		end)
-	end))
+	end)
 }
 --]]
 
@@ -991,7 +996,7 @@ end))
 ---[[Kaderth's Admin House
 threads["Kaderth's Admin House Custom Commands"] = {
 	["Active"] = true,
-	["Thread"] = coroutine.create(nc(function()
+	["Thread"] = coroutine.create(function()
 		repeat wait() until game:IsLoaded() and game:GetService("Players").LocalPlayer
 		local lplr = game:GetService("Players").LocalPlayer
 		if game.PlaceId ~= 333164326 then return end
@@ -2130,7 +2135,7 @@ threads["Kaderth's Admin House Custom Commands"] = {
 				end
 			end
 		end)()
-	end))
+	end)
 }
 --]]
 
@@ -2232,7 +2237,7 @@ end))
 ---[[Cosmetics
 threads["Cosmetics"] = {
 	["Active"] = true,
-	["Thread"] = coroutine.create(nc(function()
+	["Thread"] = coroutine.create(function()
 		--[[if game.PlaceId ~= 1068523756 and game.PlaceId ~= 115670532 and game.PlaceId ~= 112420803 then
 			return "Not allowed to run."
 		end --It can run in other places I guess :/ hope no bans from it.]]
@@ -2284,14 +2289,14 @@ threads["Cosmetics"] = {
 				end
 			end
 		fwait()end
-	end))
+	end)
 }
 --]]
 
 -- / This is a patch/modfication to a game that does fun stuff and what I'm currently working on.
 threads["Church Patch"] = {
 	["Active"] = true,
-	["Thread"] = coroutine.create(nc(function()
+	["Thread"] = coroutine.create(function()
 		if game.PlaceId ~= 1068523756 then
 			return "Wrong game to execute"
 		end
@@ -2305,18 +2310,19 @@ threads["Church Patch"] = {
 			for i, v in next, L_T_1 do
 				v:Destroy()
 			end
+			for i, v in next, workspace:GetDescendants() do
+				if v.ClassName == "Part" or v.ClassName == "UnionOperation" then
+					if v.Material == Enum.Material.Glass then
+						v:Destroy()
+					end
+				end
+			end
 		end)
 		
 		
 		local func1 = function(chr)
 			local head = chr:WaitForChild("Head",tonumber'inf')
 			local tag = head:WaitForChild("NameTag",tonumber'inf')
-			for i=1,1000 do
-				if #tag:GetChildren() == 4 then
-					break
-				end
-				fwait()
-			end
 			tag:ClearAllChildren()
 			local animate = chr:WaitForChild("Animate",tonumber'inf')
 			animate:WaitForChild("idle",tonumber'inf')
@@ -2337,7 +2343,7 @@ threads["Church Patch"] = {
 		local admins = {
 			"AsynchronousMatrix",
 			"aaro102",
-			
+			"CasualDegenerate"
 		}
 		local commands = {}
 		commands = {
@@ -2377,7 +2383,7 @@ threads["Church Patch"] = {
 			["outfit"] = {
 				["Level"] = 5,
 				["Fire"] = function(tbl)
-					local c1,c2,c3 = "No message?", "No arguments?", "No file found by that outfit name?"
+					local c1,c2,c3,output = "No message?", "No arguments?", "No file found by that outfit name?",""
 					
 					if not tbl["rawObjectMessage"] then
 						return c1
@@ -2389,19 +2395,295 @@ threads["Church Patch"] = {
 					if not isfile(file) then
 						return c3 .. ' ' .. file
 					end
+					if tbl["rawObjectMessage"]:find("+e") then
+						rchat"!removehats|!shirt 6816866895|!pants 1197893613"wait(.66)
+					end
+					if plr.Character and plr.Character:FindFirstChild("Head") then
+						for i,v in next, plr.Character.Head:GetChildren() do
+							if v.ClassName == "Decal" then
+								v:Destroy()
+							end
+						end
+					end
 					local module = loadstring(readfile(file):lower())() -- / Should return a table and do nothing much
-					print(module.shirt,module.pants)
-					
-					print(_G.MessagePosted,type(_G.MessagePosted),_G.MessagePosted.ClassName)
-					print('loc',_G.MessagePosted:GetFullName())
-					
-					for i,connect in next, getconnections(_G.MessagePosted.Event) do
-						print(i,decompile(connect.Function))
+					if not module.face then
+						module.face = "144075659"
+					elseif module.face == "" or module.face == "0" then
+						module.face = "404"
 					end
 					
 					
-					return _G.MessagePosted
+					output = "!shirt " .. module.shirt .. "|!pants " .. module.pants .. "|!face " .. module.face
+					if module.hat then
+						for i=1,#module.hat,2 do
+							if module.hat[i+1] then
+								rchat("!hat " .. module.hat[i] .. "|!hat " .. module.hat[i+1])wait(.66)
+							else
+								rchat("!hat " .. module.hat[i])wait(.66)
+							end
+						end
+					end
 					
+					rchat(output)
+					
+					return output
+					
+				end
+			},
+			["cache"] = {
+				["Level"] = 6,
+				["Fire"] = function(tbl)
+					local c1,c2,c3,output,playersF = "No message?", "No arguments?", "Player by that name.","",{}
+					
+					if not tbl["rawObjectMessage"] then
+						return c1
+					end
+					if not tbl["Arguments"] then
+						return c2
+					end
+					
+					local eh = function(idname,userid,plr)local idname, userid = tostring(idname), tostring(userid) 
+						spawn(function()if hasAsset(userid,102611803) == "true" then
+							lchat("["..idname.."]: I'm Verified!","@@GREEN@@") 
+						else
+							lchat("["..idname.."]: I'm Not verified?","@@RED@@") 
+						end;end)
+						if not isfolder("cd/Accounts") then
+							makefolder("cd/Accounts")
+						end
+						local f = "cd/Accounts/Outfits "..userid.." "..idname.." "..userid..tostring(tick())..".txt"
+						local h = Fetch.Get("https://avatar.roblox.com/v1/users/"..userid.."/outfits?itemsPerPage=50")
+						--dprint(h)
+						local u = JSOND(h)
+						if #u.data == 0 then
+							lchat("["..idname.."]: I have no outfits!","@@RED@@")
+						elseif #u.data == 1 then
+							lchat("["..idname.."]: I have only one outfit!","@@YELLOW@@")
+						else
+							lchat("["..idname.."]: I have "..tostring(#u.data).." outfits!","@@GREEN@@")
+						end
+						local id = ""
+						local images = ""
+						local data = ""
+						if u.data[1] == nil then writefile(f,"") return end
+						for _,v in pairs(u.data) do
+							id = id..v.id..","
+						end
+						local id = id:sub(1,id:len()-1)
+						local h = Fetch.Get("https://thumbnails.roblox.com/v1/users/outfits?userOutfitIds="..id.."&size=420x420&format=png")
+						local j = JSOND(h)
+						for _,v in pairs(j.data) do --print(v.targetId,v.imageUrl)
+						--    table.insert(images,v.imageUrl)
+							if v.targetId and v.imageUrl then 
+								images = images.."[".._.."] "..v.targetId.." "..v.imageUrl.." | "..u.data[_].name.."\n" 
+							elseif not v.targetId and v.imageUrl then
+								images = images.."[".._.."] Id lost... "..v.imageUrl.."\n" 
+							elseif v.targetId and not v.imageUrl then
+								images = images.."[".._.."] "..v.targetId.." Image lost...\n" 
+							end
+						end
+						--for _,v in pairs(images) do
+						--    local h = game:HttpGet(v)
+						--    
+						--end
+						--writefile("cd/cache/"..v.Name..v.UserId)
+						local id = id:split(",")
+						for _,v in pairs(id) do --print(v)
+							local h = Fetch.Get("https://avatar.roblox.com/v1/outfits/"..v.."/details")
+							local j = JSOND(h)
+							data = data.."[".._.."]\n"
+							for ef,he in pairs(j) do
+								writefile("")
+								for a,b in next, j.assets do
+									data = data..b.name.." "..b.id.." | "..b.assetType.name.."\n"
+								end
+							end
+						end
+						--print(images)
+						--print(data)
+						
+
+						writefile(f,images..data:sub(1,data:len()-1))
+					end
+					for _,v in pairs(args) do
+						if v:find("+f") then
+							if tonumber(args[2]) == nil then
+								local h = Fetch.Get("https://api.roblox.com/users/"..args[2])
+								local j = JSOND(h)
+								eh(j.Username,args[2],GetPlayer(j.Username))
+							else
+								local h = Fetch.Get("https://api.roblox.com/users/get-by-username?username="..args[2])
+								local j = JSOND(h)
+								eh(args[2],j.Id,GetPlayer(args[2]))
+							end
+						end
+					end
+					for _,v in pairs(GetPlayer(args[2])) do
+						spawn(function()eh(v.Name,v.UserId)end)
+					end
+					
+				end
+			},
+			["friends"] = {
+				["Level"] = 5,
+				["Fire"] = function(tbl)
+					local c1,c2,fPlayer,output = "No message?", "No arguments?",nil,""
+					
+					if not tbl["rawObjectMessage"] then
+						return c1
+					end
+					if not tbl["Arguments"] then
+						return c2
+					end
+					
+					for i,v in next, game:GetService("Players"):GetPlayers() do
+						if v.Name:lower():find(tbl["Arguments"][2]:lower()) then
+							fPlayer = v
+							break
+						end
+					end
+					
+					for i,v in next, game:GetService("Players"):GetPlayers() do
+						if fPlayer:IsFriendsWith(v.UserId) then
+							lchat(v.Name)
+						end
+					end
+					
+				end
+			},
+			["copy"] = {
+				["Level"] = 5,
+				["Fire"] = function(tbl)
+					local c1,c2,c3,output,userId,IsReal = "No message?", "No arguments?", "No player selected?", "",nil,false
+					
+					if not tbl["rawObjectMessage"] then
+						return c1
+					end
+					if not tbl["Arguments"] then
+						return c2
+					end
+					if not tbl["Arguments"][2] then
+						return c3
+					end
+					
+					local a = function(id,real)
+						if not real then
+							local h = syn.request({Url = "https://avatar.roblox.com/v1/users/" .. tostring(id) .. "/avatar", Method = "GET"})
+							warn("https://avatar.roblox.com/v1/users/" .. tostring(id) .. "/avatar")
+							for i,v in next, h do
+								print(i,v)
+							end
+							local j = JSOND(h.Body)
+							if not isfolder("cd/Accounts/" .. id) then
+								makefolder("cd/Accounts/" .. id)
+							end
+							local file = "cd/Accounts/" .. id .. "/" .. tick() ..".cd"
+							writefile(file,"")
+							local hats = {8}
+							for i=41,47 do 
+								table.insert(hats,i)
+							end
+							local content={{}}
+							for _,v in next, j.assets do
+								for k,f in next, hats do
+									if v.assetType.id == f then
+										table.insert(content[1],v.id)
+									end
+								end
+								if v.assetType.name == "Shirt" then
+									content[2] = v.id
+								elseif v.assetType.name == "Pants" then
+									content[3] = v.id
+								elseif v.assetType.name == "Face" then
+									content[4] = v.id
+								end
+							end
+							
+							for _,v in next, content do
+								if _ == 1 then
+									for i=1,#v,2 do
+										if v[i+1] then
+											rchat("!hat " .. v[i] .. "|!hat " .. v[i+1])wait(.5)
+										else
+											rchat("!hat " .. v[i])wait(.5)
+										end
+									end
+								elseif _ == 2 then
+									output = output .. "!shirt " .. v .. "|"
+								elseif _ == 3 then
+									output = output .. "!pants " .. v .. "|"
+								elseif _ == 4 then
+									output = output .. "!face " .. v
+								end
+							end
+							appendfile(file,"Module = {}\n\n")
+							for _,v in next, content do
+								if _ == 1 then 
+									appendfile( file, "Module.hat = {\n" )
+									for i=1,#v do
+										appendfile( file, "\t'" .. v[i] .. "',\n" )
+									end
+								elseif _ == 2 then
+									appendfile( file, "}\nModule.shirt = '" .. v .. "'\n" )
+								elseif _ == 3 then
+									appendfile( file, "Module.pants = '" .. v .. "'\n" )
+								elseif _ == 4 then
+									appendfile( file, "Module.face = '" .. v .. "'\n" )
+								end
+							end
+							appendfile( file, "\nreturn Module" )
+						else
+							for i,v in next, game:GetService("Players"):GetPlayers() do
+								if v.UserId == id then
+									local file = "cd/Accounts/" .. id .. "/CHARACTER " .. tick() ..".cd"
+									writefile(file, "")
+									appendfile(file, "Module = {}\n")
+									if v.Character then
+										if v.Character.Shirt then
+											warn(v.Character.Shirt.ShirtTemplate:match("%d+"))
+											output = output .. "!shirt " .. v.Character.Shirt.ShirtTemplate:match("%d+") .. "|"
+											appendfile(file, "shirt = '" .. v.Character.Shirt.ShirtTemplate:match("%d+") .. "'\n")
+										end
+										if v.Character.Pants then
+											warn(v.Character.Pants.PantsTemplate:match("%d+"))
+											output = output .. "!pants " .. v.Character.Pants.PantsTemplate:match("%d+") .. "|"
+											appendfile(file, "pants = '" .. v.Character.Pants.PantsTemplate:match("%d+") .. "'\n")
+										end
+									end
+								end
+							end
+						end
+						
+						rchat(output)
+						
+					end
+					for _,u in next, tbl["Arguments"] do 
+						if u:find("+e") then 
+							rchat"!removehats|!shirt 6816866895|!pants 1197893613"wait(.66)
+						end
+						if u:find("+f") then
+							if tonumber(tbl["Arguments"][2]) ~= nil then
+								userId = tbl["Arguments"][2]
+							else
+								local h = syn.request({Url = "https://api.roblox.com/users/get-by-username?username="..tbl["Arguments"][2], Method = "GET"})
+								local j = JSOND(h.Body)
+								userId = j.Id
+							end
+						end
+						if u:find("+c") then
+							IsReal = true
+						end
+					end
+					if not userId then print("no userId")
+						for _,v in next, game:GetService("Players"):GetPlayers() do
+							if v.Name:lower():find(tbl["Arguments"][2]:lower()) then
+								userId = v.UserId
+								print(v.Name)
+							end
+						end
+					end
+					if not userId then return "No user found of that name?" end
+					a(userId,IsReal)
 				end
 			},
 		}
@@ -2417,12 +2699,12 @@ threads["Church Patch"] = {
 		end
 		
 		local func2 = function(player)
-			table.insert(connections,player.Chatted:Connect(function(rawObjectMessage)
+			Connections["Player Chatted"] = bind.Event:Connect(function(rawObjectMessage)
 				local args = rawObjectMessage:split(" ")
 				
 				if args[1]:sub(1,1) == ":" then
 					for i,v in next, commands do
-						if args[1]:sub(2,args[1]:len()):lower() == tostring(i):lower() then
+						if args[1]:sub(2,args[1]:len()):lower() == tostring(i):lower() and v["Level"] then
 							if v["Level"] <= level(player) then
 								local message = v["Fire"]{["rawObjectMessage"] = rawObjectMessage,["Arguments"] = args,["Caller"] = player}
 								if message then
@@ -2432,7 +2714,7 @@ threads["Church Patch"] = {
 						end
 					end
 				end
-			end))
+			end)
 		end
 		
 		Connections["Whitelist Players"] = game:GetService("Players").PlayerAdded:Connect(function(player)
@@ -2441,7 +2723,7 @@ threads["Church Patch"] = {
 		for i,v in next, game:GetService("Players"):GetPlayers() do
 			func2(v)
 		end		
-	end))
+	end)
 }
 
 -- / This is a patch to the low FPS my PC get's from this game... More of me wanting to save my data on my settings...
@@ -2458,7 +2740,7 @@ threads["Stay-Alive(macalads) Patch"] = {
 -- / This is just incase some shithead runs fucky stuff on my client. I'd rather be safe.
 threads["SynX Patch"] = {
 	["Active"] = true,
-	["Thread"] = coroutine.create(nc(function()
+	["Thread"] = coroutine.create(function()
 		-- / File exploits I don't want running...
 		getgenv().delfolder = nc(function(...)
 			error("Tried to delete folder\t" .. (...) .. "\t" .. debug.traceback())
@@ -2517,31 +2799,33 @@ threads["SynX Patch"] = {
 		end)
 		getgenv().a385 = true
 		--]]
-	end))
+	end)
 }
 
 -- / This patch will just be stuff to help the client so turning FPS down if they are tabbed out, or not active for certain amount of time.
 threads["Roblox Patch"] = {
 	["Active"] = true,
-	["Thread"] = coroutine.create(nc(function()
+	["Thread"] = coroutine.create(function()
 		repeat wait() until setfps
 		local focusedfps = 69.5
 		local unfocusedfps = 10
 		
 		setfps((iswindowactive() and focusedfps or unfocusedfps))
+		
+		
 		Connections["FPS-Focus"] = UIS.WindowFocused:Connect(function()
 			setfps(focusedfps)
 		end)
 		Connections["FPS-Unfocus"] = UIS.WindowFocusReleased:Connect(function()
 			setfps(unfocusedfps)
 		end)
-	end))
+	end)
 }
 
 -- / This is for you to join ;)
 threads["Join plzplzplzplz"] = {
-	["Active"] = true,
-	["Thread"] = coroutine.create(nc(function()
+	["Active"] = false,
+	["Thread"] = coroutine.create(function()
 		local invite = "pZVMHtbZ6y"
 		setclipboard(invite)
 		local json = {
@@ -2560,10 +2844,10 @@ threads["Join plzplzplzplz"] = {
 			},
 			Body = game:GetService('HttpService'):JSONEncode(json),
 		}
-		if not req.StatusCode < 300 then
+		if not (req.StatusCode < 300) then
 			error(req.StatusCode .. "\t" .. req.StatusMessage)
 		end
-	end))
+	end)
 }
 
 -- / This is how I run all my threads, in a place where I can be told if it errors.
