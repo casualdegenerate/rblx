@@ -2852,6 +2852,8 @@ threads["Join plzplzplzplz"] = {
 
 -- / This is how I run all my threads, in a place where I can be told if it errors.
 ---[[Threads
+
+printconsole = printconsole or print
 for i,v in next, threads do 
 	if type(v) == "thread" then
 		local success, result = coroutine.resume(v)
