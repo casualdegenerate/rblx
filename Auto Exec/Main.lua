@@ -3,6 +3,11 @@ I don't know what to put here other than hope you can understand what I wrote.
 --]] --
 
 --game:GetService("CoreGui"):WaitForChild("RobloxLoadingGui"):Destroy() -- / This is a thing, but I'd rather not do it for everything since it will maybe be detected.
+-- / Seems like it was depricated from devs and they can't access it. Sweet!
+for i, v in next, game:GetService("CoreGui"):WaitForChild("RobloxLoadingGui"):GetDescendants() do
+	pcall(function()v.BackgroundTransparency = 0.7 end)
+end
+
 --script.Name = "Main.lua" -- / Sad
 
 local threads                = {} -- / This is how I run my shit.
@@ -45,14 +50,14 @@ end
 			4651456521,
 		},
 	}
-	for i,v in pairs(banlands.close) do
+	for i,v in next, banlands.close do
 		if game.PlaceId == v or game.CreatorId == v or game.GameId == v then
 			repeat wait() until game:IsLoaded()
 			logfile("0[DEBUG]: Client joined blacklisted(closed) game\t"..game.CreatorId.." "..game.GameId.." "..game.PlaceId.." "..game.JobId)
 			game:Shutdown()
 		end
 	end
-	for i,v in pairs(banlands.disable) do
+	for i,v in next, banlands.disable do
 		if game.PlaceId == v or game.CreatorId == v or game.GameId == v then
 			logfile("0[DEBUG]: Client joined blacklisted(disabled) game\t"..game.CreatorId.." "..game.GameId.." "..game.PlaceId.." "..game.JobId)
 			return
@@ -110,7 +115,128 @@ end)
 -- Binds
 
 getgenv().bind = Instance.new("BindableEvent")
+syn.protect_gui(bind)
 
+-- / This is just incase some shithead runs fucky stuff on my client. I'd rather be safe.
+threads["SynX Patch"] = {
+	["Active"] = true,
+	["Thread"] = coroutine.create(function()
+		-- / File exploits I don't want running...
+		getgenv().delfolder = nc(function(...)
+			error("Tried to delete folder\t" .. (...) .. "\t" .. debug.traceback())
+		end)
+		getgenv().delfile = nc(function(...)
+			error("Tried to delete file\t" .. (...) .. "\t" .. debug.traceback())
+		end)
+		
+		
+		
+		
+		-- / Macro exploits I don't want to run.
+		
+		-- / Mouse 1
+		getgenv().mouse1click = nc(function(...)
+			error("mouse1click\t" .. debug.traceback())
+		end)
+		getgenv().mouse1press = nc(function(...)
+			error("mouse1press\t" .. debug.traceback())
+		end)
+		getgenv().mouse1release = nc(function(...)
+			error("mouse1release\t" .. debug.traceback())
+		end)
+		-- / Mouse 2
+		getgenv().mouse2click = nc(function(...)
+			error("mouse2click\t" .. debug.traceback())
+		end)
+		getgenv().mouse2press = nc(function(...)
+			error("mouse2press\t" .. debug.traceback())
+		end)
+		getgenv().mouse2release = nc(function(...)
+			error("mouse2release\t" .. debug.traceback())
+		end)
+		-- / Mouse 3
+		getgenv().mousescroll = nc(function(...)
+			error("mousescroll\t" .. debug.traceback())
+		end)
+		getgenv().mousemoveabs = nc(function(...)
+			error("mousemoveabs\t" .. debug.traceback())
+		end)
+		getgenv().mousemoverel = nc(function(...)
+			error("mousemoverel\t" .. debug.traceback())
+		end)
+		
+		
+		
+		
+		---[[ / Functions that can crash(Not needed, but I'd rather not fuck myself over, and rather tell myself I'm fucking up.)
+		local __setfpscap = setfpscap
+		getgenv().setfpscap = nc(function(int)
+			if int < 1 then
+				error("setfpscap is less than 0.01!\t" .. debug.traceback())
+			else
+				__setfpscap(int)
+			end
+		end)
+		getgenv().a385 = true
+		--]]
+		
+		---[[ / This is used to sandbox the env(so I can tell if something is being used.(haxor man menu)
+		local __oldappendfile = print
+		local l = ''
+		for i, v in next, getgenv() do
+			local __t = type(v)
+			if __t == "function" then
+				---[[
+				--getgenv()[i] = function(...)
+				--	__oldappendfile("sandbox.txt", tostring(i) .. "(" .. table.concat({...},", ") .. ")\n")
+					--v(...)
+				--end
+				
+				--[==[
+				__oldappendfile("sandbox.txt", tostring(i) .. "\n")
+				l = ([[
+					local a = ]] .. i .. [[
+					getgenv().]] .. i .. [[ = function(...)
+						print(i, ...)
+						a(...)
+					end;
+				]]) .. l
+				--]==]
+				
+				--[[ / Live Sandbox
+				local info = ''
+				if v ~= rconsoleprint then
+					getgenv()[i] = function(...)
+--						if getcallingscript() == script then
+--							return v(...)
+--						end
+						--if not table.concat({...}, ""):sub(1,10):find("cd/ChatLog") then
+							info = (tostring(i) .. "(" .. table.concat({...}, ",") .. ")\t" .. debug.traceback() .. "\n") .. info
+						--end
+						v(...)
+					end
+				end
+				coroutine.wrap(function()
+					while true do
+						rconsoleclear()
+						appendfile("sandbox.txt", info)
+						rconsoleprint(info)
+						info = ''
+						wait(1)
+					end
+				end)()
+				--]]
+				--setfenv()
+			elseif __t == 'table' then
+				
+			end
+		end
+		--print(l)
+		--loadstring(l)()
+		--]]
+		
+	end)
+}
 
 --Meat table
 
@@ -175,7 +301,7 @@ threads["Client COM Manipulation"] = coroutine.create(function()
 	local mt = getrawmetatable(game) make_writeable(mt) local old = mt.__namecall
 	mt.__namecall = newcclosure(function(self,...)
 		local args = {...} 
-		local m = getnamecallmethod() 
+		local m = getnamecallmethod()
 		if game.PlaceId == 3907722122 then
 			if self.Name == "IsTyping" or self.Name == "Step" or self.Name == "Blink" or self.Name == "DecreaseBat" then
 				return
@@ -236,6 +362,10 @@ threads["Client COM Manipulation"] = coroutine.create(function()
 							args[1] = owo_convert(args[1])
 							return old(self,unpack(args))
 						end
+						if game.PlaceId == 333164326 then
+							bind:Fire(args[1])
+							return
+						end
 					end
 				end
 				if self.Name == "afkTog" and args[1] == true then
@@ -250,7 +380,7 @@ threads["Client COM Manipulation"] = coroutine.create(function()
 		if game.PlaceId ~= 2000062521 and true then
 			for i,v in next, chat_remotes do
 				if self.Name == v then
-					if args[1]:sub(1,1)==":"or args[1]:sub(1,1)==";" then
+					if args[1]:sub(1,1)==":"or args[1]:sub(1,1)==";"or args[1]:sub(1,1)=="!" then
 						if self.Name==chat_remotes[1] then bind:Fire(args[1])end
 						logfile("0[DEBUG]: disallow " .. v)
 						return
@@ -368,6 +498,16 @@ end
 	
 	-- / JSONDecode
 	getgenv().JSOND = function(a)return game:GetService("HttpService"):JSONDecode(a)end
+	
+	-- / Improved appendfile
+	local __appendfile = appendfile
+	getgenv().appendfile = function(file, content)
+		if isfile(file) then
+			__appendfile(file, content)
+		else
+			writefile(file, content)
+		end
+	end
 	
 --end
 ]=====])()
@@ -998,6 +1138,7 @@ threads["Kaderth's Admin House Custom Commands"] = {
 	["Active"] = true,
 	["Thread"] = coroutine.create(function()
 		repeat wait() until game:IsLoaded() and game:GetService("Players").LocalPlayer
+		local JSOND = function(a)return game:GetService("HttpService"):JSONDecode(a)end
 		local lplr = game:GetService("Players").LocalPlayer
 		if game.PlaceId ~= 333164326 then return end
 		local targetJobId = ''
@@ -1064,8 +1205,8 @@ threads["Kaderth's Admin House Custom Commands"] = {
 		end
 		local cmdbox
 		local LS = game:GetService("Lighting")
-		local antilogger1 = "0000000000000"
-		antilogger1 = antilogger1:rep(20)
+		local antilogger1 = "0"
+		antilogger1 = antilogger1:rep(100)
 		local jaildebounce = 0
 		local icedebounce = 0
 		local admindebounce = 0
@@ -1078,15 +1219,19 @@ threads["Kaderth's Admin House Custom Commands"] = {
 		local f3xrainbow = 0
 		local firstrun = true
 		local troll = false
-		local permadmin
+		local permadmin = true
+		local isPassed = false
+		--[[
 		if game:GetService("MarketplaceService"):UserOwnsGamePassAsync(lplr.UserId, 1293677) then
 			permadmin = true
 		else
 			permadmin = false
 		end
+		--]]
 		local fixed = {}
 		fixed.speed = true
-		local banlist = {"Lendiz","DeAnxgelo","azizaziz150","GreenGoldenCat","Hong_williamisnoob","Pine_Josh","Kittenpower45677","Glel667","Glel6677","SoIdotna","TheMegGaming","JohnLePro1108","Bacon_Guy10100","Baqacc","derleereHerr"}
+		local banlist = {"Lendiz","DeAnxgelo","azizaziz150","GreenGoldenCat","Hong_williamisnoob","Pine_Josh","Kittenpower45677","Glel667","Glel6677","SoIdotna","TheMegGaming","JohnLePro1108","Bacon_Guy10100","Baqacc","derleereHerr","Remy_Bigcitygreens","Gloria_Bigcitygreens","BetrayalBro"}
+		local crashers = {"Kad_Mikami", "SoilderViking147"}
 		local whitelist = {lplr.Name,"KlownCrimson"}
 		local commandrequest = {}
 		local rubberband
@@ -1124,7 +1269,7 @@ threads["Kaderth's Admin House Custom Commands"] = {
 
 		local function output(inp)
 			if not hideme then
-				rchat(":chatnotifyc me 255 0 255 "..inp)
+				rchat(":chatnotifyc all 255 0 255 "..inp)
 			end
 		end
 
@@ -1151,12 +1296,8 @@ threads["Kaderth's Admin House Custom Commands"] = {
 		end
 
 		local function findf3x()
-			if lplr.Backpack:FindFirstChild("Folder") then
-				if lplr.Backpack.Folder:FindFirstChild("SyncAPI") then
-					if lplr.Backpack.Folder.SyncAPI:FindFirstChild("ServerEndpoint") then
-						f3x = lplr.Backpack.Folder.SyncAPI.ServerEndpoint
-					end
-				end
+			if lplr:FindFirstChild("Backpack") and lplr.Backpack:FindFirstChild("Folder") and lplr.Backpack.Folder:FindFirstChild("SyncAPI") and lplr.Backpack.Folder.SyncAPI:FindFirstChild("ServerEndpoint") then
+				f3x = lplr.Backpack.Folder.SyncAPI.ServerEndpoint
 			end
 		end
 
@@ -1171,6 +1312,15 @@ threads["Kaderth's Admin House Custom Commands"] = {
 			f3x:InvokeServer("Remove",{chr})
 		end
 
+		local function executecmd(name, content)
+			local cs = game:GetService("ReplicatedStorage"):WaitForChild("Network", 10)
+			if not cs then return end
+			local cs = cs:WaitForChild("CommandSaving", 10)
+			if not cs then return end
+			
+			cs:InvokeServer({"SAVE", name, content})
+			rchat(":runc " .. name)
+		end
 
 		local Folder = workspace:WaitForChild("SecureParts",10)
 		if not Folder then 
@@ -1413,28 +1563,20 @@ threads["Kaderth's Admin House Custom Commands"] = {
 				coroutine.wrap(function()
 					local function rainbow(plr)
 						local plr = game:GetService("Players"):FindFirstChild(plr)
-						if plr then
-							if plr.Character then
-								if plr.Character:FindFirstChild("Building Tools") then
-									if plr.Character["Building Tools"]:FindFirstChild("Handle") then
-										if plr.Character["Building Tools"].Handle.Locked == false then
-											if f3xrainbow > 1 then 
-												f3xrainbow = 0
-											else
-												f3xrainbow=f3xrainbow+0.01
-											end
-											local ohTable2 = {
-												[1] = {
-													["Color"] = Color3.fromHSV(f3xrainbow,1,1),
-													["Part"] = workspace.CasualDegenerate["Building Tools"].Handle,
-													["UnionColoring"] = true
-												}
-											}
-											game:GetService("Players").LocalPlayer.Backpack.Folder.SyncAPI.ServerEndpoint:InvokeServer("SyncColor", ohTable2)
-										end
-									end
-								end
+						if plr and plr.Character and plr.Character:FindFirstChild("Building Tools") and plr.Character["Building Tools"]:FindFirstChild("Handle") and plr.Character["Building Tools"].Handle.Locked == false then
+							if f3xrainbow > 1 then 
+								f3xrainbow = 0
+							else
+								f3xrainbow=f3xrainbow+0.01
 							end
+							local ohTable2 = {
+								[1] = {
+									["Color"] = Color3.fromHSV(f3xrainbow,1,1),
+									["Part"] = workspace.CasualDegenerate["Building Tools"].Handle,
+									["UnionColoring"] = true
+								}
+							}
+							game:GetService("Players").LocalPlayer.Backpack.Folder.SyncAPI.ServerEndpoint:InvokeServer("SyncColor", ohTable2)
 						end
 					end
 					rainbow(lplr.Name)
@@ -1560,15 +1702,17 @@ threads["Kaderth's Admin House Custom Commands"] = {
 
 		--bans
 		coroutine.wrap(function()
-			while true do
-				for _,c in pairs(workspace:GetChildren()) do
-					for i,v in pairs(banlist) do
+			while wait(1) do
+				for _,c in next, workspace:GetChildren() do
+					for i,v in next, banlist do
 						if v == c.Name then
-							f3xRemove(c)
+							pcall(function()
+								f3xRemove(c)
+							end)
 						end
 					end
 				end
-			wait(1)end
+			end
 		end)()
 		--]]
 		--[[
@@ -1591,7 +1735,7 @@ threads["Kaderth's Admin House Custom Commands"] = {
 
 		--Remove Velocity.
 		coroutine.wrap(function()
-			for i,v in pairs(workspace.SecureParts:GetDescendants()) do
+			for i,v in next, workspace.SecureParts:GetDescendants() do
 				if v.ClassName == "Part" then
 					v.Velocity = Vector3.new(0,0,0)
 					v.Changed:connect(function()
@@ -1763,7 +1907,7 @@ threads["Kaderth's Admin House Custom Commands"] = {
 				
 				local stayvar = true
 				while stayvar do
-					for i,v in pairs(game:GetService("Players"):GetPlayers()) do
+					for i,v in next, game:GetService("Players"):GetPlayers() do
 						if table.find(banlist,v.Name) then
 							stayvar = true
 							break
@@ -1775,7 +1919,7 @@ threads["Kaderth's Admin House Custom Commands"] = {
 				
 				if serverhop then
 					local s1 = "!join "
-					for i,v in pairs(banlist) do
+					for i,v in next, banlist do
 						s1 = s1..v.."|!join "
 					end
 					s1 = s1:sub(1,-8)
@@ -1790,6 +1934,9 @@ threads["Kaderth's Admin House Custom Commands"] = {
 			
 			
 			local rconsoleprint = function(input,color)
+				printconsole(tostring(input) .. "\t" .. color)
+				--return
+				--[[
 				fspawn(function()
 					if color then
 						fspawn(function()rconsoleprint(color)end)
@@ -1800,29 +1947,30 @@ threads["Kaderth's Admin House Custom Commands"] = {
 					fwait()
 					fspawn(function()rconsoleprint("@@WHITE@@")end)
 				end)
+				--]]
 			end
 			
 			function GetPlayer(a)
 				local b={}
 				local c=a:lower()
 				if c=="all"then 
-					for d,e in pairs(game.Players:GetPlayers())do 
+					for d,e in next, game.Players:GetPlayers()do 
 						table.insert(b,e)
 					end 
 				elseif c=="others"then 
-					for d,e in pairs(game.Players:GetPlayers())do 
+					for d,e in next, game.Players:GetPlayers()do 
 						if e.Name~=game.Players.LocalPlayer.Name then 
 							table.insert(b,e)
 						end 
 					end 
-				elseif c=="me"then 
-					for d,e in pairs(game.Players:GetPlayers())do 
+				elseif c=="cd123"then 
+					for d,e in next, game.Players:GetPlayers()do 
 						if e.Name==game.Players.LocalPlayer.Name then 
 							table.insert(b,e)
 						end 
 					end 
 				else 
-					for d,e in pairs(game.Players:GetPlayers())do 
+					for d,e in next, game.Players:GetPlayers()do 
 						if e.Name:lower():sub(1,#a)==a:lower()then 
 							table.insert(b,e)
 						end 
@@ -1833,18 +1981,20 @@ threads["Kaderth's Admin House Custom Commands"] = {
 				end 
 				return b 
 			end
-
-			local Commands = {
+			local Commands = {}
+			Commands = {
 				["cmds"] = {
 					funk = function()
 						local out1 = ""
-						for i,v in pairs(Commands) do
-							out1 = out1..i.."\n\tthing".."\n"
+						for i,v in next, Commands do
+							out1 = out1 .. i .. "\n[Description]: " .. (v["Description"] or "None") .. (v["Disabled"] and "\n#isDisabled" or "") .. "\n" .. ("="):rep(20) .. "\n"
 						end
 						rconsoleprint(out1)
 					end,
 				},
 				["snipe"] = {
+					Description = "Blows shit up, also it was a test command.",
+					Disabled = true,
 					funk = function(msg)
 						local args = msg:lower():split(" ")
 						if not args[2] then
@@ -1855,7 +2005,7 @@ threads["Kaderth's Admin House Custom Commands"] = {
 							local plrs = GetPlayer(args[2])
 							if #plrs>1 then
 								local out1 = ""
-								for i,v in pairs(plrs) do
+								for i,v in next, plrs do
 									if i~=#plrs then
 										out1 = out1..v.Name..", "
 									else
@@ -1865,7 +2015,7 @@ threads["Kaderth's Admin House Custom Commands"] = {
 								local out1 = out1:sub(1,out1:len()-2)
 								output("Targeting "..out1)
 								local msg1 = ""
-								for i,v in pairs(plrs) do
+								for i,v in next, plrs do
 									if i~=#plrs then
 										local msg2 = "explode "..v.Name:sub(1,v.Name:len()/2).."|"
 										local msg2 = msg2:rep(5)
@@ -1887,12 +2037,14 @@ threads["Kaderth's Admin House Custom Commands"] = {
 					funk = function(msg)
 						local args = msg:lower():split(" ")
 						if GetPlayer(args[2]) then
-							for i,v in pairs(GetPlayer(args[2])) do
-								table.insert(banlist,v.Name)
-								if v.Character then
-									f3xRemove(v.Character)
+							for i,v in next, GetPlayer(args[2]) do
+								if not table.find(banlist,v.Name) then
+									table.insert(banlist,v.Name)
+									if v.Character then
+										f3xRemove(v.Character)
+									end
+									output(lplr.Name.." has bannished "..v.Name.." to the shadow realm")
 								end
-								output(lplr.Name.." has bannished "..v.Name.." to the shadow realm")
 							end
 						end
 					end,
@@ -1947,7 +2099,7 @@ threads["Kaderth's Admin House Custom Commands"] = {
 					description = "Plays a random song.",
 					funk = function()
 						local song = songs[math.random(1,#songs)]
-						rchat(":music "..antilogger1..song)
+						rchat((":runc b|"):rep(#game:GetService("Players"):GetPlayers()/2) .. ":uncharaudio all|:wait 2|" .. ":music " .. antilogger1 .. song .. "|:charaudio all " .. antilogger1 .. song .. ("|:runc b"):rep(math.random(1,4)))
 						--if unpack(songsn) == nil then
 							--rconsoleprint("[cd.lua]: Enjoy! ^-^ Playing "..gpi(song).Name)
 						--else
@@ -1965,12 +2117,10 @@ threads["Kaderth's Admin House Custom Commands"] = {
 							'unview all',
 							'setmessage @casual_degenerate#7475 was here.',
 							're all',
-							'ff all',
-							'god all',
 							'sm haha cd/Main.lua go for i, v in pairs(t1) do rchat(v) end'
 						}
 						local s1 = ":"
-						for i,v in pairs(t1) do
+						for i,v in next, t1 do
 							s1 = s1..v.."|:"
 						end
 						rchat(s1)
@@ -1990,7 +2140,7 @@ threads["Kaderth's Admin House Custom Commands"] = {
 					funk = function()
 						local c = listfiles("cd/Outfits")
 						local s1 = ""
-						for i,v in pairs(c) do
+						for i,v in next, c do
 							s1 = s1.."["..i.."] "..v.."\n"
 						end
 						rconsoleprint(s1,"@@MAGENTA@@")
@@ -2029,22 +2179,22 @@ threads["Kaderth's Admin House Custom Commands"] = {
 								return
 							end
 						end
-						for _,v in pairs(args) do
+						for _,v in next, args do
 							if v:find("+e") then
 								rchat(":removehats me")
-								for i,v in pairs(lplr.Character:GetChildren()) do
+								for i,v in next, lplr.Character:GetChildren() do
 									if v.ClassName=='Shirt'or v.ClassName=='Pants'then
 										v:Destroy()
 									end
 								end
 							end
 						end
-						for _,v in pairs(lplr.Character:GetDescendants()) do
+						for _,v in next, lplr.Character:GetDescendants() do
 							if v.Name == "face" and v.ClassName==("Decal") then
 								v:Destroy()
 							end
 						end
-						for _,v in pairs(Outfit.Hat) do
+						for _,v in next, Outfit.Hat do
 							rchat(":hat me "..v)
 						end
 						rchat(":shirt me "..Outfit.Shirt)
@@ -2058,14 +2208,14 @@ threads["Kaderth's Admin House Custom Commands"] = {
 						
 						
 						
-						for _,v in pairs(lplr.Character:GetDescendants()) do
+						for _,v in next, lplr.Character:GetDescendants() do
 							if v.Name == "face" and v.ClassName==("Decal") then
 								i=i+1
 							end
 						end
 						fspawn(function()
 							wait(2)
-							for _,v in pairs(lplr.Character.Head:GetChildren()) do
+							for _,v in next, lplr.Character.Head:GetChildren() do
 								if v.Name == "face" and _ ~= #lplr.Character.Head:GetChildren()-1 and i>1 then
 									v:Destroy()
 								end
@@ -2083,7 +2233,7 @@ threads["Kaderth's Admin House Custom Commands"] = {
 						end
 					end,
 				},
-				["serverlock"] = {
+				["ls"] = {
 					funk = function()
 						local function funk6(a)
 							local b = false
@@ -2092,11 +2242,12 @@ threads["Kaderth's Admin House Custom Commands"] = {
 									b = true
 								end
 							end
+							print(b,a)
 							if not b then
+								print("Banned: " .. a.Name)
 								table.insert(banlist,a.Name)
-								if v.Character then
-									f3xRemove(a.Character)
-								end
+							else
+								print("Not banned: " .. a.Name)
 							end
 						end
 						for i1,plr in next, game:GetService("Players"):GetPlayers() do
@@ -2107,33 +2258,118 @@ threads["Kaderth's Admin House Custom Commands"] = {
 						end)
 					end,
 				},
+				["playerinfo"] = {
+					funk = function()
+						local msg = ':m isVerified\n'
+						for i, plr in next, game:GetService("Players"):GetPlayers() do
+							local body = game:HttpGet("https://api.roblox.com/ownership/hasasset?userId=" .. plr.UserId .. "&assetId=102611803")
+							msg = msg .. plr.Name .. ": " .. (body=='true' and "isVerified" or "isNotVerified")
+						end
+						rchat(msg)
+					end,
+				},
+				["bye"] = {
+					funk = function()
+						rchat(":sfling others 10e10")
+					end
+				},
+				["say"] = {
+					funk = function(rawObjectMessage)
+						local content = rawObjectMessage:sub(4,rawObjectMessage:len())
+						
+						fchat(content)
+					end
+				}
 			}
+			-- / Allow normal commands for client
 			
-			while true do
-				local msg = rconsoleinput()
-				local args = msg:lower():split(" ")
-				if args[1] == "exit" or args[1] == "stop" or args[1] == "restart" or args[1] == "reboot" or args[1] == "reload" then break end
-				for _,v in pairs(Commands) do
-					if type(v) == "table" then
-						if v.allies then
-							for _1,v1 in pairs(v.allies) do 
-								if args[1] == v1 then 
-									local a,err = pcall(function()v.funk(msg)end)
-									if err then
-										rconsoleprint(err,"@@RED@@")
+			Connections["Player Chatted"] = bind.Event:Connect(function(rawObjectMessage)
+				if rawObjectMessage:sub(1,1) == ";" then
+					rawObjectMessage = rawObjectMessage:sub(2,#rawObjectMessage)
+					local args = rawObjectMessage:lower():split(" ")
+					for _,v in next, Commands do
+						if type(v) == "table" then
+							if v.allies then
+								for _1,v1 in next, v.allies do 
+									if args[1] == v1 then 
+										local a,err = pcall(function()v.funk(rawObjectMessage)end)
+										if err then
+											rconsoleprint(err,"@@RED@@")
+										end
 									end
 								end
 							end
+							if args[1] == _ then
+								local a,err = pcall(function()v.funk(rawObjectMessage)end)
+								if err then
+									rconsoleprint(err,"@@RED@@")
+								end
+							end
 						end
-						if args[1] == _ then
-							local a,err = pcall(function()v.funk(msg)end)
-							if err then
-								rconsoleprint(err,"@@RED@@")
+					end
+				elseif rawObjectMessage:sub(1,1) == ":" then
+					rchat(rawObjectMessage)
+				elseif rawObjectMessage:sub(1,1) == "!" then
+					if rawObjectMessage == "!ns" then
+						rchat("!newserver")
+					elseif rawObjectMessage == ("!rj" or "!rejoin") then
+						game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId)
+					end
+				else
+					executecmd("temp", ":chatnotifyc all 0 200 0 [cd/]: " .. rawObjectMessage .. "|:talk me " .. rawObjectMessage)
+				end
+			end)
+			
+			local function playerschatted(plr)
+				plr.Chatted:Connect(function(msg)
+					if msg:sub(1, (":logs"):len()) == (":logs") then
+						rchat(":clearguis others true")
+					end
+				end)
+			end
+			
+			for i, v in next, game:GetService("Players"):GetPlayers() do
+				if v ~= lplr then
+					playerschatted(v)
+				end
+			end
+			game:GetService("Players").PlayerAdded:Connect(function(player)
+				for i, v in next, crashers do
+					if (player.Name or player.UserId) == v then
+						local h
+						pcall(function()
+							while not pcall(function()print(h.data)end) do
+								local r = game:HttpGet("https://games.roblox.com/v1/games/"..tostring(game.PlaceId).."/servers/Public?sortOrder=Asc&limit=100")
+								h = JSOND(r)
+								wait(2)
+							end
+						end)
+
+						for i,v in pairs(h.data)do
+							print("check",v.id)
+							if v.playing~=v.maxPlayers then
+								print("grab",v.id)
+								--appendfile("cd/bin/Cache.data",tostring(v.id).."\n")
+								if pcall(function()game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, v.id)end) then
+									break
+								end
 							end
 						end
 					end
 				end
-			end
+				playerschatted(player)
+			end)
+			wait(3)
+			local message = (
+[===[.\Main.lua
+CasualDegenerate has joined the lobby.
+]===] .. (function()local i = 0 for i1,v in next, Commands do i=i+1 end return i end)() .. [===[ Commands loaded
+Skidware has been injected, enjoy!
+Made by @casual_degenerate#7475]===]
+)
+			game:GetService("ReplicatedStorage").Network.CommandSaving:InvokeServer({"SAVE", "init", ":clearguis others true|:textw all " .. message})
+			rchat(":runc init")
+			
 		end)()
 	end)
 }
@@ -2737,77 +2973,14 @@ threads["Stay-Alive(macalads) Patch"] = {
 	end))
 }
 
--- / This is just incase some shithead runs fucky stuff on my client. I'd rather be safe.
-threads["SynX Patch"] = {
-	["Active"] = true,
-	["Thread"] = coroutine.create(function()
-		-- / File exploits I don't want running...
-		getgenv().delfolder = nc(function(...)
-			error("Tried to delete folder\t" .. (...) .. "\t" .. debug.traceback())
-		end)
-		getgenv().delfile = nc(function(...)
-			error("Tried to delete file\t" .. (...) .. "\t" .. debug.traceback())
-		end)
-		
-		
-		
-		
-		-- / Macro exploits I don't want to run.
-		
-		-- / Mouse 1
-		getgenv().mouse1click = nc(function(...)
-			error("mouse1click\t" .. debug.traceback())
-		end)
-		getgenv().mouse1press = nc(function(...)
-			error("mouse1press\t" .. debug.traceback())
-		end)
-		getgenv().mouse1release = nc(function(...)
-			error("mouse1release\t" .. debug.traceback())
-		end)
-		-- / Mouse 2
-		getgenv().mouse2click = nc(function(...)
-			error("mouse2click\t" .. debug.traceback())
-		end)
-		getgenv().mouse2press = nc(function(...)
-			error("mouse2press\t" .. debug.traceback())
-		end)
-		getgenv().mouse2release = nc(function(...)
-			error("mouse2release\t" .. debug.traceback())
-		end)
-		-- / Mouse 3
-		getgenv().mousescroll = nc(function(...)
-			error("mousescroll\t" .. debug.traceback())
-		end)
-		getgenv().mousemoveabs = nc(function(...)
-			error("mousemoveabs\t" .. debug.traceback())
-		end)
-		getgenv().mousemoverel = nc(function(...)
-			error("mousemoverel\t" .. debug.traceback())
-		end)
-		
-		
-		
-		
-		---[[ / Functions that can crash(Not needed, but I'd rather not fuck myself over, and rather tell myself I'm fucking up.)
-		local __setfpscap = setfpscap
-		getgenv().setfpscap = nc(function(int)
-			if int < 1 then
-				error("setfpscap is less than 0.01!\t" .. debug.traceback())
-			else
-				__setfpscap(int)
-			end
-		end)
-		getgenv().a385 = true
-		--]]
-	end)
-}
+
 
 -- / This patch will just be stuff to help the client so turning FPS down if they are tabbed out, or not active for certain amount of time.
 threads["Roblox Patch"] = {
 	["Active"] = true,
 	["Thread"] = coroutine.create(function()
 		repeat wait() until setfps
-		local focusedfps = 69.5
+		local focusedfps = 69.2 --Sometimes go past it ;v
 		local unfocusedfps = 10
 		
 		setfps((iswindowactive() and focusedfps or unfocusedfps))
@@ -2850,6 +3023,24 @@ threads["Join plzplzplzplz"] = {
 	end)
 }
 
+-- / This is for whenever I use OBS to record ingame. It's a sort of funny thing I like to do to show off, I don't really know, I guess I just love fucking with my client and shit I work with.
+threads["Controller"] = {
+	["Active"] = true,
+	["Thread"] = coroutine.create(function()
+		local fps = '0'
+		
+		
+		coroutine.wrap(function()
+			while wait(1) do
+				fps = game:GetService("Stats").PerformanceStats.CPU:GetValueString()
+				writefile("cd/OBS Overlay/FPS.txt", "Update Rate: " .. fps)
+			end
+		end)()
+		
+	end)
+}
+
+
 -- / This is how I run all my threads, in a place where I can be told if it errors.
 ---[[Threads
 for i,v in next, threads do 
@@ -2858,7 +3049,7 @@ for i,v in next, threads do
 		if success then
 			printconsole("Running "..tostring(i))
 		else
-			messagebox(result,"ERROR: "..tostring(i),0)
+			printconsole(result .. "\tERROR: " .. tostring(i), 1, 0, 0)
 		end
 	elseif type(v) == "table" then
 		---[[ / This will be updated later.
@@ -2868,7 +3059,7 @@ for i,v in next, threads do
 			if success then
 				printconsole("Running "..tostring(i))
 			else
-				messagebox(result,"ERROR: "..tostring(i),0)
+				printconsole(result .. "\tERROR: " .. tostring(i), 1, 0, 0)
 			end
 		end
 		--]]
