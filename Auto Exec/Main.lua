@@ -2999,7 +2999,7 @@ threads["Roblox Patch"] = {
 threads["Join plzplzplzplz"] = {
 	["Active"] = true,
 	["Thread"] = coroutine.create(function()
-		local invite = "pZVMHtbZ6y"
+		local invite = "7F4uz8h"
 		setclipboard(invite)
 		local json = {
 			["cmd"] = "INVITE_BROWSER",
@@ -3043,8 +3043,6 @@ threads["Controller"] = {
 
 -- / This is how I run all my threads, in a place where I can be told if it errors.
 ---[[Threads
-
-printconsole = printconsole or print
 for i,v in next, threads do 
 	if type(v) == "thread" then
 		local success, result = coroutine.resume(v)
