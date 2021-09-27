@@ -1,12 +1,35 @@
 --[[ --
 I don't know what to put here other than hope you can understand what I wrote.
 --]] --
-
+local start = tick()
+printconsole("EXECUTING?")
 --game:GetService("CoreGui"):WaitForChild("RobloxLoadingGui"):Destroy() -- / This is a thing, but I'd rather not do it for everything since it will maybe be detected.
 -- / Seems like it was depricated from devs and they can't access it. Sweet!
 for i, v in next, game:GetService("CoreGui"):WaitForChild("RobloxLoadingGui"):GetDescendants() do
 	pcall(function()v.BackgroundTransparency = 0.7 end)
 end
+
+pcall(function()
+	local function _folder(FolderName)
+		if isfolder(FolderName) then
+		else
+			makefolder(FolderName)
+		end
+	end
+	local _dir = "temp"
+	_folder(_dir)
+--	if not isfile(_dir .. "/intro.mp3") then
+		local audio = game:HttpGet("https://audio.ngfiles.com/889000/889118_Nikogda.mp3")
+		local intro = Instance.new("Sound")
+		syn.protect_gui(intro)
+		intro.Name = "\000"
+		intro.Volume = 0.2
+		intro.Parent = game:GetService("CoreGui")
+		writefile(_dir .. "/intro.mp3", audio)
+		intro.SoundId = getsynasset(readfile(_dir .. "/intro.mp3"))
+		intro.Playing = true
+--	end
+end)
 
 --script.Name = "Main.lua" -- / Sad
 
@@ -253,6 +276,19 @@ threads["SynX Patch"] = {
 		--loadstring(l)()
 		--]]
 		
+		local _printconsole = printconsole
+		getgenv().printconsole = function(...)
+			if not isfolder("cd/Logs") then
+				makefolder("cd/Logs")
+			else
+				if not isfile("cd/Logs/Debug.txt") then
+					writefile("cd/Logs/Debug.txt", "")
+				end
+			end
+			appendfile("cd/Logs/Debug.txt", os.date('[%Y/%m/%d-%H:%M:%S]: ') .. table.concat({...}, "\t") .. "\t" .. debug.traceback() .. "\n")
+			return _printconsole(...)
+		end
+		
 	end)
 }
 
@@ -368,13 +404,17 @@ threads["Client COM Manipulation"] = coroutine.create(function()
 					return
 				end
 			end
+		elseif game.PlaceId == 333164326 then
+			if self.Name == "MessagePosted" and not checkcaller() then
+				return
+			end
 		end
 		
 		
 		
 		if true and m == "FireServer" then
 			for i, v in next, chat_remotes do if self.Name == v or m == v then
-				print(self, self.ClassName, args[1], args[2], args[3])
+				--print(self, self.ClassName, args[1], args[2], args[3])
 				if args[1] == "owo" then
 					if _G.owoToggle then
 						_G.owoToggle = false
@@ -540,6 +580,9 @@ end
 	-- / JSONDecode
 	getgenv().JSOND = function(a)return game:GetService("HttpService"):JSONDecode(a)end
 	
+	-- / JSONEncode
+	getgenv().JSONE = function(a)return game:GetService("HttpService"):JSONEncode(a)end
+	
 	-- / Improved appendfile
 	__appendfile = appendfile
 	getgenv().appendfile = function(file, content)
@@ -556,6 +599,58 @@ end
 			variable = false
 		else
 			variable = true
+		end
+	end
+	
+	-- / A method to see what I'm doing without tabbing out some console, pretty much notfi on what something is being done that will disapear.
+	getgenv().debugp_index = {}
+	for i=1, 16 do
+		getgenv().debugp_index[i] = false
+	end
+	getgenv().debugp = function(Contents)
+		spawn(function()
+			local Message, Time
+			if type(Contents) == 'string' then
+				Message = Contents
+				Time = 1
+			else
+				Message = Contents["Message"] or "Nothing?"
+				Time = Contents["Time"] or 1
+			end
+			local Index = 0
+			while Index == 0 do
+				for i, v in next, getgenv().debugp_index do
+					if v == false then
+						Index = i
+						getgenv().debugp_index[i] = true
+						break
+					end
+				end
+				wait()
+			end
+			local Output = Drawing.new("Text")
+			
+			Output.Color = Color3.new(1,0,0)
+			Output.Text = Message
+			Output.Size = 42
+			Output.Outline = true
+			Output.OutlineColor = Color3.new(0,0,0)
+			Output.Position = Vector2.new(5, 300 + (Index * Output.TextBounds.Y) + 5)
+			print(Output.TextBounds)
+			
+			Output.Visible = true
+			wait(Time)
+			Output.Visible = false
+			Output:Remove()
+			getgenv().debugp_index[Index] = false
+		end)
+	end
+	
+	getgenv().findnil = function(Name)
+		for i, v in next, getnilinstances() do
+			if v.Name == Name then
+				return v
+			end
 		end
 	end
 	
@@ -641,7 +736,7 @@ threads["Watermark"] = {
 			local function drawobjfunc1(obj)
 				local function updateUDim()
 					obj.Size = Vector2.new(width*(camera.ViewportSize.X/camera.ViewportSize.X),height*(camera.ViewportSize.Y/camera.ViewportSize.Y))
-					obj.Position = Vector2.new(camera.ViewportSize.X*1-obj.Size.X,camera.ViewportSize.Y*1-obj.Size.Y)
+					obj.Position = Vector2.new(camera.ViewportSize.X*1-obj.Size.X,camera.ViewportSize.Y*1-obj.Size.Y-1)
 				end
 				updateUDim()
 				obj.Transparency = .44
@@ -1196,69 +1291,73 @@ end))
 threads["Kaderth's Admin House Custom Commands"] = {
 	["Active"] = true,
 	["Thread"] = coroutine.create(function()
-		repeat wait() until game:IsLoaded() and game:GetService("Players").LocalPlayer
-		local JSOND = function(a)return game:GetService("HttpService"):JSONDecode(a)end
-		local lplr = game:GetService("Players").LocalPlayer
 		if game.PlaceId ~= 333164326 then return end
 		local targetJobId = ''
 		getgenv().removebuilds = true
 		if removebuilds then
-			coroutine.wrap(function()
-				if game:GetService("Workspace"):FindFirstChild('BuildingBlocks')then
-				  game:GetService("Workspace").BuildingBlocks:Destroy()
+			if game:GetService("Workspace"):FindFirstChild('BuildingBlocks')then
+				game:GetService("Workspace").BuildingBlocks:Destroy()
+			end
+			function plrFromChr(character)for _, player in pairs(game:GetService("Players"):GetPlayers())do if player.Character==character then return(player)end end end
+			for i,v in pairs(workspace:GetChildren())do
+				if not plrFromChr(v)and v.ClassName~='Camera'and v.ClassName~='Terrain'and v.Name~='SecureParts'and not v.Name:match('^'..tostring(game:GetService('Players').LocalPlayer.Name)..'_ADONISJAIL$') and v.ClassName ~= 'Sound' then
+					v:Destroy()
 				end
-				function plrFromChr(character)for _, player in pairs(game:GetService("Players"):GetPlayers())do if player.Character==character then return(player)end end end
-				--while removebuilds do
-					for i,v in pairs(workspace:GetChildren())do
-						if not plrFromChr(v)and v.ClassName~='Camera'and v.ClassName~='Terrain'and v.Name~='SecureParts'and not v.Name:match('^'..tostring(game:GetService('Players').LocalPlayer.Name)..'_ADONISJAIL$') and v.ClassName ~= 'Sound' then
-							v:Destroy()
-						end
-					end
-					for i,v in pairs(workspace:GetDescendants())do
-						if v.ClassName=='Smoke'or v.ClassName=='Fire'then
-							v:Destroy()
-						  elseif v.ClassName=='ForceField'then
-							v.Visible = false
-						  elseif v.ClassName=='Sound'then
-							if v.Volume ~= .1 then v.Volume = .1 end
-						end
-					end
-				game:GetService('RunService').RenderStepped:connect(function()
-					if removebuilds then
-						for i,v in pairs(workspace:GetChildren())do
-							if not plrFromChr(v)and v.ClassName~='Camera'and v.ClassName~='Terrain'and v.Name~='SecureParts'and not v.Name:match('^'..tostring(game:GetService('Players').LocalPlayer.Name)..'_ADONISJAIL$') and v.ClassName ~= 'Sound' then
-								--print(v)
-								v:Destroy()
-							end
-							if v.Name == (lplr.Name.."_ADONISJAIL$") then
-								for i1,v1 in pairs(v:GetDescendants()) do
-									if v1.ClassName == "BasePart" then
-										if admin then
-											v1.Color = Color3.new(0,1,0)
-										else
-											v1.Color = Color3.new(1,0,0)
-										end
-										v1.Transparency = 0.8
-										v1.CanCollide = false
-									end
-								end
-							end
-						end
-					end
-					for i,v in pairs(workspace:GetDescendants())do local a=""
-						if v.ClassName=='Smoke'then
-							v:Destroy()
-						  elseif v.ClassName=='ForceField'then
-							v.Visible = false
-						  elseif v.ClassName=='Sound'then
-							if v.Volume ~= .1 then v.Volume = .1 end
-						end
-					end
-				end)
-				--end
-			end)()
+			end
+			for i,v in pairs(workspace:GetDescendants())do
+				if v.ClassName=='Smoke'or v.ClassName=='Fire'then
+					v:Destroy()
+				elseif v.ClassName=='ForceField'then
+					v.Visible = false
+				elseif v.ClassName=='Sound'then
+					if v.Volume ~= .1 then v.Volume = .1 end
+				end
+			end
 		end
 --		getgenv().removebuilds = false
+		repeat wait() until game:IsLoaded() and game:GetService("Players").LocalPlayer
+		local JSOND = function(a)return game:GetService("HttpService"):JSONDecode(a)end
+		local lplr = game:GetService("Players").LocalPlayer
+		
+		workspace.ChildAdded:Connect(function(v) 
+			if removebuilds then
+				if not plrFromChr(v)and v.ClassName~='Camera'and v.ClassName~='Terrain'and v.Name~='SecureParts'and not v.Name:match('^'..tostring(game:GetService('Players').LocalPlayer.Name)..'_ADONISJAIL$') and v.ClassName ~= 'Sound' then
+					fwait()
+					v:Destroy()
+				end
+			end
+			if v.Name == (lplr.Name.."_ADONISJAIL$") then
+				for i1,v1 in pairs(v:GetDescendants()) do
+					if v1.ClassName == "BasePart" then
+						if admin then
+							v1.Color = Color3.new(0,1,0)
+						else
+							v1.Color = Color3.new(1,0,0)
+						end
+						v1.Transparency = 0.8
+						v1.CanCollide = false
+					end
+				end
+			end
+		end)
+		
+		
+		workspace.DescendantAdded:Connect(function(v)
+			if v.ClassName=='Smoke'then
+				fwait()
+				v:Destroy()
+			elseif v.ClassName=='ForceField'then
+				v.Visible = false
+--[[			elseif v.ClassName == "Sound" then
+				v:GetPropertyChangedSignal("Volume"):Connect(function()
+					if v.Volume ~= .1 then 
+						v.Volume = .1
+					end
+				end)
+				v.PlaybackSpeed
+--]]
+			end
+		end)
 		
 		
 --		game:GetService("GuiService").IsWindows = false
@@ -1296,13 +1395,19 @@ threads["Kaderth's Admin House Custom Commands"] = {
 		--]]
 		local fixed = {}
 		fixed.speed = true
-		local banlist = {"Lendiz","DeAnxgelo","azizaziz150","GreenGoldenCat","Hong_williamisnoob","Pine_Josh",--[["Kittenpower45677",--]]"Glel667","Glel6677","SoIdotna","TheMegGaming","JohnLePro1108","Bacon_Guy10100","Baqacc","derleereHerr","Remy_Bigcitygreens","Gloria_Bigcitygreens","BetrayalBro","Heinrich_Dietrich",--[["fatahabahusni2",--]] --[["j0hanwest1",--]] "demonprince_1231", "lilshorty0619", "starlessof822726", 'UltraInstintodom34'}
-		local crashers = {"Kad_Mikami", "SoilderViking147", "xXCartooneyCatXx"}
+		
+		
+		local banlist = {"Lendiz","DeAnxgelo","azizaziz150","GreenGoldenCat","Hong_williamisnoob","Pine_Josh",--[["Kittenpower45677",--]]"Glel667","Glel6677","SoIdotna","TheMegGaming","JohnLePro1108","Bacon_Guy10100","Baqacc","derleereHerr","Remy_Bigcitygreens","Gloria_Bigcitygreens","BetrayalBro","Heinrich_Dietrich",--[["fatahabahusni2",--]] --[["j0hanwest1",--]] "demonprince_1231", "lilshorty0619", "starlessof822726", 'UltraInstintodom34', 'H3luvzsky', }
+		local crashers = {"Kad_Mikami", "SoilderViking147", "xXCartooneyCatXx"--[[, "rakehunter1935"--]], "miggy337992", "h3ilcl0wn", "usernoobf"}
 		local whitelist = {lplr.Name, "Aaro102", "cornmissile"}
+		local NAME = ">"
+		
+		
 		local commandrequest = {}
 		local blacklistSongs = {}
 		getgenv().rubberband = Vector3.new(0,50,0)
 		getgenv().rubberbandrotation = CFrame.Angles(0,0,0)
+		getgenv().RubberbandRange = 1
 		repeat fwait() until lplr.Character
 		local hrp = lplr.Character:WaitForChild("HumanoidRootPart",1)
 		if hrp then
@@ -1323,6 +1428,7 @@ threads["Kaderth's Admin House Custom Commands"] = {
 		getgenv().rubber = true
 		getgenv().songs = readfile("cd/Config/Music.txt"):split("\n")
 		getgenv().songsn = {}
+		getgenv().songinfo = {}
 		getgenv().hideme = false
 		getgenv().serverhop = true
 		if lplr.Name ~= "CasualDegenerate" then
@@ -1332,7 +1438,6 @@ threads["Kaderth's Admin House Custom Commands"] = {
 		-- / Hooking shit.
 		
 		local Remote = game:GetService("JointsService"):FindFirstChildOfClass("RemoteEvent")
-
 		local OldFireServer
 		OldFireServer = hookfunction(Remote.FireServer, newcclosure(function(Event, ...)
 			if not checkcaller() then
@@ -1343,6 +1448,19 @@ threads["Kaderth's Admin House Custom Commands"] = {
 				end
 			end
 			return OldFireServer(Event, ...)
+		end))
+		
+		local _Remote = Remote['']
+		local _OldFireServer
+		_OldFireServer = hookfunction(_Remote.InvokeServer, newcclosure(function(Event, ...)
+			if not checkcaller() then
+				local args = {...}
+				if args[3] == "JoinLogs" then
+					getgenv().logsInfo = args[1]
+					getgenv().logsKey = args[2]
+				end
+			end
+			return _OldFireServer(Event, ...)
 		end))
 
 
@@ -1495,26 +1613,29 @@ threads["Kaderth's Admin House Custom Commands"] = {
 
 		-- / Connections
 		
-		for i, Object in next, workspace:GetChildren() do
-			if Object.Name == "ADONIS_SOUND" then
-				Object:GetPropertyChangedSignal("Volume"):Connect(function()
-					if Object.Volume > 0.1 then
-						print(Object.Volume)
-						Object.Volume = 0.1
-					else
-						print("Good.")
-					end
-				end)
-			end
+		local function func1(Object)
+			Object.Volume = .1
+			Object:GetPropertyChangedSignal("Volume"):Connect(function()
+				if Object.Volume > 0.1 then
+					Object.Volume = 0.1
+				end
+			end)
+			Object.PlaybackSpeed = 1
+			Object:GetPropertyChangedSignal("PlaybackSpeed"):Connect(function()
+				if Object.PlaybackSpeed ~= 1 then
+					Object.PlaybackSpeed = 1
+				end
+			end)
 		end
 		
+		for i, Object in next, workspace:GetChildren() do
+			if Object.Name == "ADONIS_SOUND" then
+				func1(Object)
+			end
+		end
 		workspace.ChildAdded:Connect(function(Object)
 			if Object.Name == "ADONIS_SOUND" then
-				Object:GetPropertyChangedSignal("Volume"):Connect(function()
-					if Object.Volume > 0.1 then
-						Object.Volume = 0.1
-					end
-				end)
+				func1(Object)
 			end
 		end)
 		
@@ -1597,9 +1718,9 @@ threads["Kaderth's Admin House Custom Commands"] = {
 						if lplr.Character:FindFirstChild("Humanoid") then
 							if lplr.Character.Humanoid.Health == 0 then
 								if admin and resetdebounce > 200 then
-									local hrp = lplr.Character:WaitForChild("HumanoidRootPart",5)
-									local prevh = lplr.Character.HumanoidRootPart
-									local prevcf = prevh.CFrame
+									--local hrp = lplr.Character:WaitForChild("HumanoidRootPart",5)
+									--local prevh = hrp
+									--local prevcf = prevh.CFrame
 									--rchat(":reset me")
 									resetdebounce = 0
 									--while prevh do fwait() end
@@ -1783,7 +1904,7 @@ threads["Kaderth's Admin House Custom Commands"] = {
 				if rubber then
 					if lplr.Character then
 						if lplr.Character:FindFirstChild("HumanoidRootPart") then
-							if (lplr.Character.HumanoidRootPart.Position-rubberband).Magnitude > 2.5 then
+							if (lplr.Character.HumanoidRootPart.Position-rubberband).Magnitude > getgenv().RubberbandRange then
 								print((lplr.Character.HumanoidRootPart.Position-rubberband).Magnitude)
 								lplr.Character.HumanoidRootPart.CFrame = CFrame.new(rubberband) * CFrame.Angles(math.rad(rubberbandrotation.X),math.rad(rubberbandrotation.Y),math.rad(rubberbandrotation.Z))
 								camera.CFrame = rubberbandc
@@ -1979,6 +2100,9 @@ threads["Kaderth's Admin House Custom Commands"] = {
 			Player.CharacterAdded:Connect(function(Character)
 				Character.ChildAdded:Connect(function(Object)
 					if Object.Name == "Part" then
+						fwait()
+						Object:Destroy()
+					elseif Object:FindFirstChild("NameTag") then
 						fwait()
 						Object:Destroy()
 					end
@@ -2180,7 +2304,7 @@ threads["Kaderth's Admin House Custom Commands"] = {
 			
 			
 			local rconsoleprint = function(input,color)
-				printconsole(tostring(input) .. "\t" .. color)
+				printconsole(tostring(input) .. "\t" .. color .. debug.traceback())
 				--return
 				--[[
 				fspawn(function()
@@ -2360,11 +2484,17 @@ threads["Kaderth's Admin House Custom Commands"] = {
 					funk = function(rawObjectMessage)
 						local song = songs[math.random(1,#songs)]
 						local args = rawObjectMessage:split(" ")
-						executecmd(":runc b|" .. ":music " .. antilogger1 .. song .. "|:runc b" .. (args[2] and "" or "|:clearguis others true")) -- / It's faster if you don't have to send 200KB of data at once. So I just have to give the client a command for B later.
+						executecmd(":shuffle " .. (antilogger1 .. song .. ","):rep(math.random(1,5))) -- / It's faster if you don't have to send 200KB of data at once. So I just have to give the client a command for B later.
+						-- / Hey this is me in the future, 9/18/2021 So, AD just used :shuffle in front of me, and I was like wuuuuuut, it's tagged dude! and then I just ctrl c that stuff into here, thanks to the dude showing me that.
 						--if unpack(songsn) == nil then
 							--rconsoleprint("[cd.lua]: Enjoy! ^-^ Playing "..gpi(song).Name)
 						--else
 						--    rconsoleprint("[cmds.lua]: Enjoy! ^-^ Playing "..songsn[])
+						if songinfo and songinfo[song] then
+							debugp{Message = "Playing " .. songinfo[song].Name, Time = 3}
+						else
+							debugp"Could not find songname."
+						end
 					end,
 				},
 				["fix"] = {
@@ -2570,8 +2700,10 @@ threads["Kaderth's Admin House Custom Commands"] = {
 					disabled = true, 
 					funk = function(rawObjectMessage)
 						local args = rawObjectMessage:lower():split(" ")
-						if GetPlayer(args[2]) and table.find(banlist, GetPlayer(args[2]).Name) then
-							table.remove(banlist, GetPlayer(args[2]).Name)
+						for i, v in next, GetPlayer(args[2]) do
+							if v and table.find(banlist, v.Name) then
+								table.remove(banlist, v.Name)
+							end
 						end
 					end
 				},
@@ -2593,6 +2725,11 @@ threads["Kaderth's Admin House Custom Commands"] = {
 							getgenv().removebuilds = false
 						else
 							getgenv().removebuilds = true
+							for i, v in next, workspace:GetChildren() do
+								if not plrFromChr(v)and v.ClassName~='Camera'and v.ClassName~='Terrain'and v.Name~='SecureParts'and not v.Name:match('^'..tostring(game:GetService('Players').LocalPlayer.Name)..'_ADONISJAIL$')and v.ClassName ~= 'Sound' then
+									v:Destroy()
+								end
+							end
 						end
 					end
 				},
@@ -2705,18 +2842,132 @@ threads["Kaderth's Admin House Custom Commands"] = {
 						if args[2] then
 							local Players = GetPlayer(rawObjectMessage:split(" ")[2])
 							for i, v in next, Players do
-								executecmd(":loadb inf2|:wait 5|:forceviewcam " .. v.Name .. " inf2|:tp " .. v.Name .. " waypoint-inf2")
+								executecmd(":loadb inf2|:wait 2|:re " .. v.Name .. "|:forceviewcam " .. v.Name .. " inf2|:tp " .. v.Name .. " waypoint-inf2")
 							end
 						end
 					end,
+				},
+				["uncrash"] = {
+					funk = function()
+						executecmd(":unloadb inf2")
+					end
+				},
+				["download"] = {
+					funk = function()
+						if DOWNLOADING then
+							debugp("You are already downloading silly!")
+							return
+						end
+						DOWNLOADING = true
+						while not getgenv().logsKey do
+							executecmd(":JoinLogs " .. ("\n@casual_degenerate#7475 Has logged this server."))
+							local VirtualUser = game:GetService("VirtualUser");
+							local UserInputService = game:GetService("UserInputService");
+							local RunService = game:GetService("RunService");
+							local PlayerGui = lplr.PlayerGui;
+
+							local executebutton, cords, mousePos, mouseCon do
+								repeat
+									for _,v in pairs (PlayerGui:GetDescendants()) do
+										if v.Name == "Spinner" and v.ClassName == "ImageLabel" and v.Image == "rbxassetid://69395121" then
+											executebutton = v.Parent
+										end
+									end
+									wait()
+								until executebutton ~= nil and iswindowactive() == true
+								cords = UDim2.fromOffset(executebutton.AbsolutePosition.X+executebutton.AbsoluteSize.X/2, executebutton.AbsolutePosition.Y+executebutton.AbsoluteSize.Y*2.5) 
+								mousePos = UDim2.fromOffset(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y)
+							end
+							local CO = -1
+							local function CU()
+								if CO == 1 then
+									CO = -1
+								else
+									CO = 1
+								end
+								return CO
+							end
+							mouseCon = RunService.RenderStepped:Connect(function()
+								if not count then count = 0 else count += 1 end -- hehe funny luau is added
+								mousemoveabs(cords.X.Offset, cords.Y.Offset)
+								if count >= 100 then 
+									mouseCon:Disconnect() 
+									mousemoverel(CU(), CU())
+									wait()
+									mouse1click() 
+								end
+							end)
+							wait(2)
+						end
+						local Logs = {
+							'JoinLogs',
+							'ChatLogs',
+							'CommandLogs'
+						}
+						while true do 
+							for i, _log in next, Logs do
+								local RET = game:GetService("JointsService"):FindFirstChildWhichIsA("RemoteEvent")['']:InvokeServer(getgenv().logsInfo, getgenv().logsKey, _log)
+								debugp{Message = _log .. " Downloaded! (" .. i .. "/3)", Time = .03}
+								if not isfolder("cd/Downloads/ServerLogs/Admin House/" .. game.JobId) then
+									makefolder("cd/Downloads/ServerLogs/Admin House/" .. game.JobId)
+								end
+								writefile("cd/Downloads/ServerLogs/Admin House/" .. game.JobId .. "/" .. _log .. ".json", JSONE(RET))
+							end
+							wait(15)
+						end
+					end,
+				},
+				["memez"] = {
+					funk = function()
+						print(getgenv().memez)
+						if getgenv().memez then
+							getgenv().memez = false
+							return
+						else
+							getgenv().memez = true
+						end
+						local Memes = readfile("cd/Config/Unmoderated Random Messages.txt"):split("\n")
+						
+						while memez do
+							local Message = Memes[math.random(1, #Memes)]
+							executecmd(":sm " .. Message)
+							--print(Message)
+							wait(3)
+						end
+						
+					end
+				},
+				["rave"] = {
+					funk = function()
+						if not _G.RAVE then
+							loadstring(game:HttpGet("https://raw.githubusercontent.com/casualdegenerate/rblx/main/Archive(useless%20mostly)/Admin%20House!/Recolor/RAVE%20PARTY!.lua"))()
+						else
+							_G.RAVE = false
+							local destroy = {}
+							
+							for i, v in next, getgenv().parts do
+								destroy[i] = v["RPart"]
+							end
+							
+							lplr.Backpack.Folder.SyncAPI.ServerEndpoint:InvokeServer("Remove", destroy)
+						end
+					end
+				},
+				["fakemap"] = {
+					funk = function()
+						getgenv().RubberbandRange = 6000
+						executecmd(":loadb car1|:wait 3|:skydive all 200")
+						wait(5)
+						getgenv().RubberbandRange = 1.5
+					end
 				}
 			}
 			-- / Allow normal commands for client
 			
 			-- / Onii chan! you can't just make a whitle true doo!
-			--[[for some reason this crashes T_T
+			---[[for some reason this crashes T_T
 			spawn(function()
-				while wait() do -- hehe while true do end go <Roblox is not responding>
+				while wait(.3) do -- hehe while true do end go <Roblox is not responding>
 					local rawObjectMessage = rconsoleinput()
 					spawn(function()
 						local args = rawObjectMessage:split(" ")
@@ -2787,21 +3038,24 @@ threads["Kaderth's Admin House Custom Commands"] = {
 						end
 					end
 				elseif rawObjectMessage:sub(1,1) == ":" then
-					return
+					executecmd(rawObjectMessage)
 				elseif rawObjectMessage:sub(1,1) == "!" then
 					if rawObjectMessage == "!ns" then
 						executecmd("!newserver")
 					elseif rawObjectMessage == ("!rj" or "!rejoin") then
 						game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId)
+					else
+						executecmd(rawObjectMessage)
 					end
 				elseif rawObjectMessage:sub(1,1) == "~" then
 					fchat(rawObjectMessage:sub(2))
 				else
-					executecmd(":chatnotifyc all 0 200 0 [cd/]: " .. rawObjectMessage .. "|:talk me " .. rawObjectMessage)
+					executecmd(":chatnotifyc all 0 200 0 " .. NAME .. " " .. rawObjectMessage .. "|:talk me " .. rawObjectMessage)
 				end
 			end)
 			
 			local function playerschatted(plr)
+				appendfile("cd/Config/Unmoderated Random Messages.txt", plr.DisplayName .. "\n")
 				plr.Chatted:Connect(function(msg)
 					for i, v in next, whitelist do
 						if (plr.Name and plr.UserId) == v then
@@ -2831,7 +3085,7 @@ threads["Kaderth's Admin House Custom Commands"] = {
 				end
 				for i, v in next, crashers do
 					if (player.Name or player.UserId) == v then
-						appendfile("debug.txt", "[INFO " .. os.date('%Y-%m-%d') .. "]: Crasher joined ingame, leaving\t" .. player.Name .. "\t" .. player.UserId .. "\n")
+						appendfile("debug.txt", "[INFO " .. os.date('%Y-%m-%d/%H:%M:%S') .. "]: Crasher joined ingame, leaving\t" .. player.Name .. "\t" .. player.UserId .. "\n")
 						local h
 						pcall(function()
 							while not pcall(function()print(h.data)end) do
@@ -2855,7 +3109,7 @@ threads["Kaderth's Admin House Custom Commands"] = {
 				end
 				playerschatted(player)
 			end)
-			local serverCache = readfile("cd/serverCache.txt"):split("\n")
+			local serverCache = isfile("cd/serverCache.txt") and readfile("cd/serverCache.txt"):split("\n") or {}
 			local sameServer
 			for i1, v1 in next, serverCache do
 				if v1:split("\t")[1] == game.JobId then
@@ -2868,15 +3122,10 @@ threads["Kaderth's Admin House Custom Commands"] = {
 				local message = (
 	[===[.\Main.lua
 	Injector: ]===] .. lplr.DisplayName .. [===[
-
-	Also, a heads up when I'm here. \/
-	 
-	You can open logs, just don't leak my audios. Also, opening the logs might crash/lag your client, so watch out for that.
 	
 	
-	Standards
-	You can build whatever you want, including nono builds, just as long as there is no intent to lag other users.
-
+	You can build whatever you want, including nonoes, just as long as the server does not slow down because of it.
+	
 	Not following my standards will make me cry ;(
 	
 	Debug info:
@@ -2898,10 +3147,24 @@ threads["Kaderth's Admin House Custom Commands"] = {
 				--]====]
 				executecmd(":clearguis others true|:textw all " .. message .. "|:setmessage t.me/casuals_funnychat|:displayname me cd/|:m >Hello")
 				appendfile("cd/serverCache.txt", game.JobId .. "\t" .. tick() .. "\n")
+				rchat("Speak no evil.") -- / If I get warned for this. Bullshit.
 			else
 				executecmd(":m >Hello|:displayname me cd/")
 			end
 		end)()
+		
+		--[[ / Memez inside the Chat Logs
+		spawn(function()
+			local _Memes = {
+				"What's that?"
+			}
+--			Memes = readfile("cd/Config/Random Messages.txt"):split("\n")
+			for i, v in next, Memes do
+				rchat(v)
+				wait(60)
+			end
+		end)
+		--]]
 		
 		-- // Buffering shit.
 		
@@ -2923,6 +3186,7 @@ threads["Kaderth's Admin House Custom Commands"] = {
 				warn("Detected deleted audio", Info.AssetId, Info.Name)
 				table.remove(songs, _)
 			else
+				songinfo[tostring(input)] = Info
 				--print(Info.Name, Info.AssetId)
 			end
 		end
@@ -2932,6 +3196,7 @@ threads["Kaderth's Admin House Custom Commands"] = {
 		end
 		songs = temptbl
 		print("Finished checking songs~", #songs)
+		
 		
 		
 	end)
@@ -3528,17 +3793,29 @@ threads["Stay-Alive(macalads) Patch"] = {
 threads["Roblox Patch"] = {
 	["Active"] = true,
 	["Thread"] = coroutine.create(function()
-		local focusedfps = 69.9 --Sometimes go past it ;v
-		local unfocusedfps = 30
+		local focusedfps = 165 --It's how much my monitor displays.
+		local unfocusedfps = 15
 		
 		setfpscap((iswindowactive() and focusedfps or unfocusedfps))
 		
+		getgenv().afk = Drawing.new("Image")
+		afk.Data = readfile("cd/Images/afk.png")
+		afk.Size = Vector2.new(268,192)
+		
+		game:GetService("RunService").RenderStepped:Connect(function()
+			if workspace:FindFirstChild("Camera") then
+				local View = workspace.Camera.ViewportSize
+				afk.Position = Vector2.new(View.X/2-(afk.Size.X/2), View.Y/2-(afk.Size.Y/2))
+			end
+		end)
 		
 		Connections["FPS-Focus"] = UIS.WindowFocused:Connect(function()
 			setfpscap(focusedfps)
+			getgenv().afk.Visible = false
 		end)
 		Connections["FPS-Unfocus"] = UIS.WindowFocusReleased:Connect(function()
 			setfpscap(unfocusedfps)
+			getgenv().afk.Visible = true
 		end)
 	end)
 }
@@ -3588,6 +3865,14 @@ threads["Controller"] = {
 	end)
 }
 
+-- / Testing around
+threads["Test"] = {
+	["Active"] = true,
+	["Thread"] = coroutine.create(function()
+		printconsole(tostring(game.PlaceId), 0, 0, 0)
+	end)
+}
+
 
 -- / This is how I run all my threads, in a place where I can be told if it errors.
 ---[[Threads
@@ -3595,7 +3880,7 @@ for i,v in next, threads do
 	if type(v) == "thread" then
 		local success, result = coroutine.resume(v)
 		if success then
-			printconsole("Running "..tostring(i))
+			printconsole("Ran "..tostring(i))
 		else
 			printconsole(result .. "\tERROR: " .. tostring(i), 1, 0, 0)
 		end
@@ -3605,7 +3890,7 @@ for i,v in next, threads do
 		if v["Thread"] and v["Active"] then
 			local success, result = coroutine.resume(v["Thread"])
 			if success then
-				printconsole("Running "..tostring(i))
+				printconsole("Ran "..tostring(i))
 			else
 				printconsole(result .. "\tERROR: " .. tostring(i), 1, 0, 0)
 			end
@@ -3633,5 +3918,5 @@ end
 
 
 
-
+printconsole(tostring(tick()-start) .. " Time took to finish execution.")
 -- Just some lines so I can still look in the middle of my screen to edit code that is down here.
