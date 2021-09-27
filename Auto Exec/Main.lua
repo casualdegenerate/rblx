@@ -10,26 +10,35 @@ for i, v in next, game:GetService("CoreGui"):WaitForChild("RobloxLoadingGui"):Ge
 end
 
 pcall(function()
-	local function _folder(FolderName)
-		if isfolder(FolderName) then
-		else
-			makefolder(FolderName)
+	coroutine.wrap(function()
+		local function _folder(FolderName)
+			if isfolder(FolderName) then
+			else
+				makefolder(FolderName)
+			end
 		end
-	end
-	local _dir = "temp"
-	_folder(_dir)
---	if not isfile(_dir .. "/intro.mp3") then
-		local audio = game:HttpGet("https://audio.ngfiles.com/889000/889118_Nikogda.mp3")
-		local intro = Instance.new("Sound")
-		syn.protect_gui(intro)
-		intro.Name = "\000"
-		intro.Volume = 0.2
-		intro.Parent = game:GetService("CoreGui")
-		writefile(_dir .. "/intro.mp3", audio)
-		intro.SoundId = getsynasset(readfile(_dir .. "/intro.mp3"))
-		intro.Playing = true
---	end
+		local _dir = "Playlist"
+		local func1
+		func1 = function()
+			_folder(_dir)
+			local file = listfiles(_dir)[math.random(1, #listfiles(_dir))]:gsub("\\", "/")
+			print(file)
+			local intro = Instance.new("Sound")
+			syn.protect_gui(intro)
+			intro.Name = "\000"
+			intro.Volume = .1
+			intro.Parent = game
+			intro.SoundId = getsynasset(file)
+			intro:Play()
+			intro.Ended:Connect(function()
+				intro:Destroy()
+				func1()
+			end)
+		end
+		func1()
+	end)()
 end)
+
 
 --script.Name = "Main.lua" -- / Sad
 
@@ -1294,35 +1303,15 @@ threads["Kaderth's Admin House Custom Commands"] = {
 		if game.PlaceId ~= 333164326 then return end
 		local targetJobId = ''
 		getgenv().removebuilds = true
-		if removebuilds then
-			if game:GetService("Workspace"):FindFirstChild('BuildingBlocks')then
-				game:GetService("Workspace").BuildingBlocks:Destroy()
-			end
-			function plrFromChr(character)for _, player in pairs(game:GetService("Players"):GetPlayers())do if player.Character==character then return(player)end end end
-			for i,v in pairs(workspace:GetChildren())do
-				if not plrFromChr(v)and v.ClassName~='Camera'and v.ClassName~='Terrain'and v.Name~='SecureParts'and not v.Name:match('^'..tostring(game:GetService('Players').LocalPlayer.Name)..'_ADONISJAIL$') and v.ClassName ~= 'Sound' then
-					v:Destroy()
-				end
-			end
-			for i,v in pairs(workspace:GetDescendants())do
-				if v.ClassName=='Smoke'or v.ClassName=='Fire'then
-					v:Destroy()
-				elseif v.ClassName=='ForceField'then
-					v.Visible = false
-				elseif v.ClassName=='Sound'then
-					if v.Volume ~= .1 then v.Volume = .1 end
-				end
-			end
-		end
---		getgenv().removebuilds = false
 		repeat wait() until game:IsLoaded() and game:GetService("Players").LocalPlayer
 		local JSOND = function(a)return game:GetService("HttpService"):JSONDecode(a)end
 		local lplr = game:GetService("Players").LocalPlayer
+		function plrFromChr(character)for _, player in pairs(game:GetService("Players"):GetPlayers())do if player.Character==character then return(player)end end end
 		
 		workspace.ChildAdded:Connect(function(v) 
 			if removebuilds then
-				if not plrFromChr(v)and v.ClassName~='Camera'and v.ClassName~='Terrain'and v.Name~='SecureParts'and not v.Name:match('^'..tostring(game:GetService('Players').LocalPlayer.Name)..'_ADONISJAIL$') and v.ClassName ~= 'Sound' then
-					fwait()
+				fwait()
+				if not plrFromChr(v)and v.ClassName~='Camera'and v.ClassName~='Terrain'and v.Name~='SecureParts'and not v.Name:match('^'..tostring(lplr.Name)..'_ADONISJAIL$') and v.ClassName ~= 'Sound' then
 					v:Destroy()
 				end
 			end
@@ -1359,6 +1348,30 @@ threads["Kaderth's Admin House Custom Commands"] = {
 			end
 		end)
 		
+		
+		if removebuilds then
+			spawn(function()
+				wait(3)
+				if game:GetService("Workspace"):FindFirstChild('BuildingBlocks')then
+					game:GetService("Workspace").BuildingBlocks:Destroy()
+				end
+				
+				for i,v in next, workspace:GetChildren() do
+					if not plrFromChr(v)and v.ClassName~='Camera'and v.ClassName~='Terrain'and v.Name~='SecureParts'and not v.Name:match('^'..tostring(lplr.Name)..'_ADONISJAIL$') and v.ClassName ~= 'Sound' then
+						v:Destroy()
+					end
+				end
+				for i,v in next, workspace:GetDescendants() do
+					if v.ClassName=='Smoke'or v.ClassName=='Fire'then
+						v:Destroy()
+					elseif v.ClassName=='ForceField'then
+						v.Visible = false
+					elseif v.ClassName=='Sound'then
+						if v.Volume ~= .1 then v.Volume = .1 end
+					end
+				end
+			end)
+		end
 		
 --		game:GetService("GuiService").IsWindows = false
 --		settings():GetService("PhysicsSettings").AreAnchorsShown = true
@@ -2956,9 +2969,30 @@ threads["Kaderth's Admin House Custom Commands"] = {
 				["fakemap"] = {
 					funk = function()
 						getgenv().RubberbandRange = 6000
-						executecmd(":loadb car1|:wait 3|:skydive all 200")
+						executecmd(":loadb car1|:wait 3|:unfly all|:skydive all 200")
 						wait(5)
 						getgenv().RubberbandRange = 1.5
+					end
+				},
+				["nosound"] = {
+					funk = function()
+						if nosound then
+							nosound:Disconnect()
+							nosound = nil
+						else
+							nosound = workspace.DescendantAdded:Connect(function(Object)
+								if Object.ClassName == "Sound" then
+									Object.Volume = 0
+									fwait()
+									Object.Parent = nil
+								end
+							end)
+							for i, v in next, workspace:GetDescendants() do
+								if v.ClassName == "Sound" then
+									v.Parent = nil
+								end
+							end
+						end
 					end
 				}
 			}
