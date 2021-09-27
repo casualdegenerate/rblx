@@ -22,7 +22,6 @@ pcall(function()
 		func1 = function()
 			_folder(_dir)
 			local file = listfiles(_dir)[math.random(1, #listfiles(_dir))]:gsub("\\", "/")
-			print(file)
 			local intro = Instance.new("Sound")
 			syn.protect_gui(intro)
 			intro.Name = "\000"
