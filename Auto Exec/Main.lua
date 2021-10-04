@@ -636,8 +636,8 @@ end
 				Message = Contents
 				Time = 1
 			else
-				Message = Contents["Message"] or "Nothing?"
-				Time = Contents["Time"] or 1
+				Message = Contents["Message"] or Contents[1] or "Nothing?"
+				Time = Contents["Time"] or Contents[2] or 1
 			end
 			local Index = 0
 			while Index == 0 do
@@ -2156,25 +2156,33 @@ threads["Kaderth's Admin House Custom Commands"] = {
 					
 					HRP.Size = (function()if type(Torso) == 'vector' then return Torso else return Torso.Size end end)() * 1.05
 					
+					local C = {}
 					HRP.Transparency = 0
-					HRP:GetPropertyChangedSignal("Transparency"):Connect(function()
+					C[0] = HRP:GetPropertyChangedSignal("Transparency"):Connect(function()
 						if HRP.Transparency ~= 0 then
 							HRP.Transparency = 0
 						end
 					end)
 					---[[
 					HRP.Material = Enum.Material.ForceField
-					HRP:GetPropertyChangedSignal("Material"):Connect(function()
+					C[1] = HRP:GetPropertyChangedSignal("Material"):Connect(function()
 						if HRP.Material ~= Enum.Material.ForceField then
 							HRP.Material = Enum.Material.ForceField
 						end
 					end)
 					HRP.Color = Color3.new(1,0,0)
-					HRP:GetPropertyChangedSignal("Color"):Connect(function()
+					C[2] = HRP:GetPropertyChangedSignal("Color"):Connect(function()
 						if HRP.Color ~= Color3.new(1,0,0) then
 							HRP.Color = Color3.new(1,0,0)
 						end
 					end)
+					while HRP.Parent.Parent do
+						wait(.1)
+					end
+					for _, Connection in next, C do
+						Connection:Disconnect()
+					end
+					debugp{"haha memory leak go", .07}
 					--]]
 				end)
 			end
@@ -2598,6 +2606,7 @@ threads["Kaderth's Admin House Custom Commands"] = {
 							'undeadlands all',
 							'unview all',
 							're all',
+							'bring others',
 							'fly all'
 						}
 						local s1 = ":"
@@ -3341,12 +3350,14 @@ threads["Kaderth's Admin House Custom Commands"] = {
 				for i, v in next, lplr.PlayerGui:GetChildren() do
 					if v:FindFirstChild("LABEL") and v.LABEL.Text == getgenv().advert then
 						FOUNDADVERT = true
+					else
+						FOUNDADVERT = false
 					end
 				end
 				if not FOUNDADVERT then
 					executecmd(":setmessage " .. getgenv().advert)
 				end
-				wait(30)
+				wait(15)
 			end
 		end)
 		
@@ -4046,6 +4057,57 @@ threads["Controller"] = {
 			end
 		end)()
 		
+	end)
+}
+
+threads["Presence Check"] = {
+	["Active"] = true,
+	["Thread"] = coroutine.create(function()
+		local SEARCH = {
+			['userIds'] = {
+				[1550707812] = "F4reD3mon",
+				[318058156]  = "Co-Owner"
+			}
+		}
+		local userIds = {}
+		for i, v in next, SEARCH.userIds do
+			userIds[#userIds+1] = i
+			print(i)
+		end
+		local Responce
+		local success
+		while true do
+			success, _ = pcall(function()
+				Responce = syn.request{
+					Url = "https://presence.roblox.com/v1/presence/users",
+					Method = "POST",
+					Body = JSONE{
+						['userIds'] = userIds
+					},
+					Headers = {
+						['Content-Type'] = 'application/json',
+						['Origin'] = 'https://skidware.nekoware.lgbt',
+						['User-Agent']='casual_degenerate/7475 (Literally SynapseX) AppleWebKit/537.36 (KHTML, like Gecko) MSIE/8.0 Safari/537.36'
+					}
+				}
+			end)
+			if success then
+				local DATA = JSOND(Responce.Body)
+				for i, v in next, DATA.userPresences do
+					if v["userPresenceType"] == 2 then -- / Online
+--						printconsole(v.userId .. " Is Active!")
+--						printconsole(SEARCH.userIds[v.userId] .. " Is Active!")
+						debugp(SEARCH.userIds[v.userId] .. "(" .. v.userId .. ") Is Active!", 10)
+					else
+						printconsole(SEARCH.userIds[v.userId] .. "(" .. v.userId .. ") Is offline!")
+					end
+				end
+				wait(20)
+			else
+				wait(3)
+			end
+			wait(.5)
+		end
 	end)
 }
 
