@@ -9,8 +9,22 @@ for i, v in next, game:GetService("CoreGui"):WaitForChild("RobloxLoadingGui"):Ge
 	pcall(function()v.BackgroundTransparency = 0.7 end)
 end
 
+-- / Panic function
+getgenv().a = function()
+	game:Shutdown()
+	wait()
+	while true do end
+end
+
+getgenv().togglemusic = function()
+	_G.playmusic = false
+	getgenv().introVol = 0
+	getgenv().intro:Destroy()
+end
+
 pcall(function()
 	coroutine.wrap(function()
+		_G.playmusic = true
 		local function _folder(FolderName)
 			if isfolder(FolderName) then
 			else
@@ -18,23 +32,23 @@ pcall(function()
 			end
 		end
 		local _dir = "Playlist"
+		getgenv().introVol = .1
+		_folder(_dir)
+		local files = listfiles(_dir)
+		getgenv().intro = Instance.new("Sound")
+		syn.protect_gui(intro)
+		intro.Name = "\000"
+		intro.Volume = getgenv().introVol
+		intro.Parent = game
 		local func1
-		func1 = function()
-			_folder(_dir)
-			local file = listfiles(_dir)[math.random(1, #listfiles(_dir))]:gsub("\\", "/")
-			local intro = Instance.new("Sound")
-			syn.protect_gui(intro)
-			intro.Name = "\000"
-			intro.Volume = .1
-			intro.Parent = game
-			intro.SoundId = getsynasset(file)
-			intro:Play()
-			intro.Ended:Connect(function()
-				intro:Destroy()
-				func1()
-			end)
+		while _G.playmusic do
+			for i, file in next, files do
+				intro.SoundId = getsynasset(file:gsub("\\", "/"))
+				intro:Play()
+				intro.Ended:Wait()
+			end
+			wait()
 		end
-		func1()
 	end)()
 end)
 
@@ -734,7 +748,9 @@ threads["Watermark"] = {
 		if isfolder("CONFIG/Watermark") then
 			local function str2hex(str)local o=''for i=1,#str do local h=string.format('%x',str:byte(i))local t=('00'):sub(tostring(h):len()+1)o=o..t..tostring(h)end return(o)end
 			local images = listfiles('CONFIG/Watermark')
-			local image  = readfile(images[math.random(1,#images)])
+			local image = images[math.random(1,#images)]
+			printconsole("Loading image for watermark, " .. image)
+			image        = readfile(image)
 			local camera = workspace.CurrentCamera
 			local width  = tonumber( str2hex(image:sub(17,20)),16)
 			local width  = width   / 2
@@ -744,7 +760,7 @@ threads["Watermark"] = {
 			local function drawobjfunc1(obj)
 				local function updateUDim()
 					obj.Size = Vector2.new(width*(camera.ViewportSize.X/camera.ViewportSize.X),height*(camera.ViewportSize.Y/camera.ViewportSize.Y))
-					obj.Position = Vector2.new(camera.ViewportSize.X*1-obj.Size.X,camera.ViewportSize.Y*1-obj.Size.Y-1)
+					obj.Position = Vector2.new(camera.ViewportSize.X*1-obj.Size.X,(camera.ViewportSize.Y*1-obj.Size.Y)+1)
 				end
 				updateUDim()
 				obj.Transparency = .44
@@ -1409,17 +1425,17 @@ threads["Kaderth's Admin House Custom Commands"] = {
 		fixed.speed = true
 		
 		
-		local banlist = {"Lendiz","DeAnxgelo","azizaziz150","GreenGoldenCat","Hong_williamisnoob","Pine_Josh",--[["Kittenpower45677",--]]"Glel667","Glel6677","SoIdotna","TheMegGaming","JohnLePro1108","Bacon_Guy10100","Baqacc","derleereHerr","Remy_Bigcitygreens","Gloria_Bigcitygreens","BetrayalBro","Heinrich_Dietrich",--[["fatahabahusni2",--]] --[["j0hanwest1",--]] "demonprince_1231", "lilshorty0619", "starlessof822726", 'UltraInstintodom34', 'H3luvzsky', }
-		local crashers = {"Kad_Mikami", "SoilderViking147", "xXCartooneyCatXx"--[[, "rakehunter1935"--]], "miggy337992", "h3ilcl0wn", "usernoobf"}
+		local banlist = {"Lendiz","DeAnxgelo","azizaziz150","GreenGoldenCat","Hong_williamisnoob","Pine_Josh",--[["Kittenpower45677",--]]"Glel667","Glel6677","SoIdotna","TheMegGaming","JohnLePro1108","Bacon_Guy10100","Baqacc","derleereHerr","Remy_Bigcitygreens","Gloria_Bigcitygreens","BetrayalBro","Heinrich_Dietrich",--[["fatahabahusni2",--]] --[["j0hanwest1",--]] "demonprince_1231", "lilshorty0619", "starlessof822726", 'UltraInstintodom34', 'H3luvzsky', 'Icy_IcyCube', 'ididkdididlld'}
+		local crashers = {"Kad_Mikami", "SoilderViking147", "xXCartooneyCatXx", "rakehunter1935", "miggy337992", "h3ilcl0wn", "usernoobf"}
 		local whitelist = {lplr.Name, "Aaro102", "cornmissile"}
-		local NAME = ">"
+		local NAME = ""
 		
 		
 		local commandrequest = {}
 		local blacklistSongs = {}
 		getgenv().rubberband = Vector3.new(0,50,0)
 		getgenv().rubberbandrotation = CFrame.Angles(0,0,0)
-		getgenv().RubberbandRange = 1
+		getgenv().RubberbandRange = .7
 		repeat fwait() until lplr.Character
 		local hrp = lplr.Character:WaitForChild("HumanoidRootPart",1)
 		if hrp then
@@ -1628,8 +1644,8 @@ threads["Kaderth's Admin House Custom Commands"] = {
 		local function func1(Object)
 			Object.Volume = .1
 			Object:GetPropertyChangedSignal("Volume"):Connect(function()
-				if Object.Volume > 0.1 then
-					Object.Volume = 0.1
+				if Object.Volume > .1 then
+					Object.Volume = .1
 				end
 			end)
 			Object.PlaybackSpeed = 1
@@ -1965,7 +1981,7 @@ threads["Kaderth's Admin House Custom Commands"] = {
 			coroutine.wrap(function()
 				if lplr.Character then
 					if lplr.Character:FindFirstChild("HumanoidRootPart") then
-						if lplr.Character.HumanoidRootPart.Position.Y < -50 then
+						if lplr.Character.HumanoidRootPart.Position.Y < 10 then
 							rubber=false
 							lplr.Character.HumanoidRootPart.CFrame = CFrame.new(0,25,0)
 							rubberband = lplr.Character.HumanoidRootPart.Position
@@ -2069,57 +2085,109 @@ threads["Kaderth's Admin House Custom Commands"] = {
 			end
 		end)()
 
-		lplr.PlayerGui.DescendantAdded:connect(function(c)
-			if c.Name == "CameraShake" then
-				c.Disabled = true
+		lplr.PlayerGui.DescendantAdded:connect(function(Descendant)
+			if Descendant.Name == "CameraShake" then
+				Descendant.Disabled = true
 				fwait()
-				c:Destroy()
+				Descendant:Destroy()
 			end
-			if c.ClassName==("TextLabel") then
-				if c.Text:find("Follow: ") and false then
-					if c.Parent then
-						if c.Parent.Parent then
-							if c.Parent.Parent ~= nil then
+			if Descendant.ClassName==("TextLabel") then
+				if Descendant.Text:find("Follow: ") and false then
+					if Descendant.Parent then
+						if Descendant.Parent.Parent then
+							if Descendant.Parent.Parent ~= nil then
 								fwait()
-								c.Parent.Parent:Destroy()
+								Descendant.Parent.Parent:Destroy()
 							end
 						end
 					end
 				end
 			end
-			if c.ClassName == "TextLabel" then
-				if c.Text == "Command Box" then
-					cmdbox = c.Parent.Parent
+			if Descendant.ClassName == "TextLabel" then
+				if Descendant.Text == "Command Box" then
+					cmdbox = Descendant.Parent.Parent
 				end
 			end
-			if c.ClassName == "ScreenGui" and c.DataCost == 40 then
-				fwait()
-				c:Destroy()
+			if Descendant.ClassName == "ScreenGui" then
+				if Descendant.DataCost == 40 then
+					fwait()
+					Descendant:Destroy()
+				end
 			end
 			---[[
-			if pcall(function()if type(c.Text) == 'string' then return true else return false end end) and not pcall(function()c.Text:GetFullName()end) then
-				c.Changed:Connect(function()
-					if #c.Text > 1000 then
-						c.Text = c.Text:sub(1, 1000)
+			if pcall(function()if type(Descendant.Text) == 'string' then return true else return false end end) and not pcall(function()Descendant.Text:GetFullName()end) then
+				Descendant.Changed:Connect(function()
+					if #Descendant.Text > 1000 then
+						Descendant.Text = Descendant.Text:sub(1, 1000)
 					end
 				end)
 			end
 			---]]
 		end)
 		
+		lplr.PlayerGui.ChildAdded:Connect(function(Child)
+			if Child.ClassName == "ScreenGui" then
+				if Child:FindFirstChild("Drag") and Child.Drag:FindFirstChild("Title") and Child.Drag.Title.Text == "Message from " .. lplr.Name then
+					Child.Enabled = false
+					fwait()
+					Child:Destroy()
+					debugp("Destroying Joined Message")
+--				elseif Child:FindFirstChild("LABEL") and Child.LABEL.Text == "" then -- / Depricated code, please Ctrl F (executecmd(":setmessage " .. getgenv().advert)) to understand what I was about to do.
+					
+				end
+			end
+		end)
+		
 		--- / Other players being patched.
 		local function Patch(Player)
-			Player.CharacterAdded:Connect(function(Character)
-				Character.ChildAdded:Connect(function(Object)
-					if Object.Name == "Part" then
-						fwait()
-						Object:Destroy()
-					elseif Object:FindFirstChild("NameTag") then
-						fwait()
-						Object:Destroy()
-					end
+			local func1 = function(Character)
+				spawn(function()
+					Character.ChildAdded:Connect(function(Object)
+						if Object.Name == "Part" then
+							fwait()
+							Object:Destroy()
+						elseif Object:FindFirstChild("NameTag") then
+							fwait()
+							Object:Destroy()
+						end
+					end)
+					local HRP = Character:WaitForChild("HumanoidRootPart")
+					local Torso = Character:WaitForChild("Torso", 5) or Vector3.new(2, 2, 1)
+					
+					HRP.Size = (function()if type(Torso) == 'vector' then return Torso else return Torso.Size end end)() * 1.05
+					
+					HRP.Transparency = 0
+					HRP:GetPropertyChangedSignal("Transparency"):Connect(function()
+						if HRP.Transparency ~= 0 then
+							HRP.Transparency = 0
+						end
+					end)
+					---[[
+					HRP.Material = Enum.Material.ForceField
+					HRP:GetPropertyChangedSignal("Material"):Connect(function()
+						if HRP.Material ~= Enum.Material.ForceField then
+							HRP.Material = Enum.Material.ForceField
+						end
+					end)
+					HRP.Color = Color3.new(1,0,0)
+					HRP:GetPropertyChangedSignal("Color"):Connect(function()
+						if HRP.Color ~= Color3.new(1,0,0) then
+							HRP.Color = Color3.new(1,0,0)
+						end
+					end)
+					--]]
 				end)
-			end)
+			end
+			if Player.Character then
+				func1(Player.Character)
+				Player.CharacterAdded:Connect(function(Chr)
+					func1(Chr)
+				end)
+			else
+				Player.CharacterAdded:Connect(function(Chr)
+					func1(Chr)
+				end)
+			end
 		end
 		
 		game:GetService("Players").PlayerAdded:Connect(function(Player)
@@ -2172,6 +2240,7 @@ threads["Kaderth's Admin House Custom Commands"] = {
 					Object:Destroy()
 				end
 			end)
+			
 		end)
 		--]]
 
@@ -2308,6 +2377,15 @@ threads["Kaderth's Admin House Custom Commands"] = {
 			end)
 --			wait(30)
 --			game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId)
+		end)()
+		
+		-- / Connecting the camera for making it none manipulatable. hhhhhhh
+		
+		coroutine.wrap(function()
+			local camera = workspace:WaitForChild("Camera",10)
+			if not camera then
+				debugp("What the fuck? Camera is not found?")
+			end
 		end)()
 
 		--Active Commands
@@ -2709,7 +2787,7 @@ threads["Kaderth's Admin House Custom Commands"] = {
 					end
 				},
 				["unban"] = {
-					disabled = true, 
+					disabled = false,
 					funk = function(rawObjectMessage)
 						local args = rawObjectMessage:lower():split(" ")
 						for i, v in next, GetPlayer(args[2]) do
@@ -2832,6 +2910,7 @@ threads["Kaderth's Admin House Custom Commands"] = {
 					end
 				},
 				["rainbow"] = {
+					disabled = true,
 					funk = function(rawObjectMessage)
 						
 					end
@@ -2866,11 +2945,11 @@ threads["Kaderth's Admin House Custom Commands"] = {
 				},
 				["download"] = {
 					funk = function()
-						if DOWNLOADING then
+						if DOWNLOADING_1_ then
 							debugp("You are already downloading silly!")
 							return
 						end
-						DOWNLOADING = true
+						DOWNLOADING_1_ = true
 						while not getgenv().logsKey do
 							executecmd(":JoinLogs " .. ("\n@casual_degenerate#7475 Has logged this server."))
 							local VirtualUser = game:GetService("VirtualUser");
@@ -2914,7 +2993,8 @@ threads["Kaderth's Admin House Custom Commands"] = {
 						local Logs = {
 							'JoinLogs',
 							'ChatLogs',
-							'CommandLogs'
+							'CommandLogs',
+							'PartCountUpdate'
 						}
 						while true do 
 							for i, _log in next, Logs do
@@ -2993,12 +3073,45 @@ threads["Kaderth's Admin House Custom Commands"] = {
 							end
 						end
 					end
+				},
+				["noturn"] = {
+					funk = function()
+						executecmd(":spin all|:spin all")
+					end
+				},
+				["click"] = {
+					disabled = true,
+					funk = function()
+					
+					end,
+				},
+				["clnomusic"] = {
+					funk = togglemusic
+				},
+				["booba"] = {
+					funk = function()
+						executecmd(":charaudio me " .. [===[ 
+██████╗░░█████╗░░█████╗░██████╗░░██████╗
+██╔══██╗██╔══██╗██╔══██╗██╔══██╗██╔════╝
+██████╦╝██║░░██║██║░░██║██████╦╝╚█████╗░
+██╔══██╗██║░░██║██║░░██║██╔══██╗░╚═══██╗
+██████╦╝╚█████╔╝╚█████╔╝██████╦╝██████╔╝
+╚═════╝░░╚════╝░░╚════╝░╚═════╝░╚═════╝░ ]===])
+					end
+				},
+				["ascii"] = {
+					function(rawObjectMessage)
+						local wanted = rawObjectMessage:split(" ")[2]
+						if ascii[wanted] then
+						
+						end
+					end
 				}
 			}
 			-- / Allow normal commands for client
 			
 			-- / Onii chan! you can't just make a whitle true doo!
-			---[[for some reason this crashes T_T
+			--[[for some reason this crashes T_T
 			spawn(function()
 				while wait(.3) do -- hehe while true do end go <Roblox is not responding>
 					local rawObjectMessage = rconsoleinput()
@@ -3083,7 +3196,14 @@ threads["Kaderth's Admin House Custom Commands"] = {
 				elseif rawObjectMessage:sub(1,1) == "~" then
 					fchat(rawObjectMessage:sub(2))
 				else
-					executecmd(":chatnotifyc all 0 200 0 " .. NAME .. " " .. rawObjectMessage .. "|:talk me " .. rawObjectMessage)
+					local changes = {
+						['`tou'] = "東",
+						['`hou'] = "方"
+					}
+					for _find, _change in next, changes do
+						rawObjectMessage = rawObjectMessage:gsub(_find, _change)
+					end
+					executecmd(":chatnotifyc all 0 200 0 " .. NAME .. rawObjectMessage .. "|:talk me " .. rawObjectMessage)
 				end
 			end)
 			
@@ -3096,7 +3216,7 @@ threads["Kaderth's Admin House Custom Commands"] = {
 						end
 					end
 					
-					if msg:sub(1, (":logs"):len()) == (":logs") and antilogging then
+					if msg:lower():find("logs") and getgenv().antilogging then
 						executecmd(":clearguis others true")
 					end
 				end)
@@ -3112,33 +3232,47 @@ threads["Kaderth's Admin House Custom Commands"] = {
 				end
 			end
 			game:GetService("Players").PlayerAdded:Connect(function(player)
+				local function getServerType()
+					if game.PrivateServerId ~= "" then
+						if game.PrivateServerOwnerId ~= 0 then
+							return "VIPServer"
+						else
+							return "ReservedServer"
+						end
+					else
+						return "StandardServer"
+					end
+				end
 				print(lplr:IsFriendsWith(player.UserId))
 				if lplr:IsFriendsWith(player.UserId) then
 					table.insert(whitelist, player.Name)
 				end
-				for i, v in next, crashers do
-					if (player.Name or player.UserId) == v then
-						appendfile("debug.txt", "[INFO " .. os.date('%Y-%m-%d/%H:%M:%S') .. "]: Crasher joined ingame, leaving\t" .. player.Name .. "\t" .. player.UserId .. "\n")
-						local h
-						pcall(function()
-							while not pcall(function()print(h.data)end) do
-								local r = game:HttpGet("https://games.roblox.com/v1/games/"..tostring(game.PlaceId).."/servers/Public?sortOrder=Asc&limit=100")
-								h = JSOND(r)
-								wait(2)
-							end
-						end)
+				if getServerType() == "StandardServer" then
+					for i, v in next, crashers do
+						if (player.Name or player.UserId) == v then
+							appendfile("debug.txt", "[INFO " .. os.date('%Y-%m-%d/%H:%M:%S') .. "]: Crasher joined ingame, leaving\t" .. player.Name .. "\t" .. player.UserId .. "\n")
+							local h
+							pcall(function()
+								while not pcall(function()print(h.data)end) do
+									local r = game:HttpGet("https://games.roblox.com/v1/games/"..tostring(game.PlaceId).."/servers/Public?sortOrder=Asc&limit=100")
+									h = JSOND(r)
+									wait(2)
+								end
+							end)
 
-						for i,v in pairs(h.data)do
-							print("check",v.id)
-							if v.playing~=v.maxPlayers and v.id ~= game.JobId then
-								print("grab",v.id)
-								--appendfile("cd/bin/Cache.data",tostring(v.id).."\n")
-								if pcall(function()game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, v.id)end) then
-									break
+							for i,v in pairs(h.data)do
+								print("check",v.id)
+								if v.playing~=v.maxPlayers and v.id ~= game.JobId then
+									print("grab",v.id)
+									--appendfile("cd/bin/Cache.data",tostring(v.id).."\n")
+									if pcall(function()game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, v.id)end) then
+										break
+									end
 								end
 							end
 						end
 					end
+					return
 				end
 				playerschatted(player)
 			end)
@@ -3198,6 +3332,23 @@ threads["Kaderth's Admin House Custom Commands"] = {
 			end
 		end)
 		--]]
+		
+		-- / Advertize
+		
+		spawn(function()
+			getgenv().advert = '@casual_degenerate#7475 was here.'
+			while true do
+				for i, v in next, lplr.PlayerGui:GetChildren() do
+					if v:FindFirstChild("LABEL") and v.LABEL.Text == getgenv().advert then
+						FOUNDADVERT = true
+					end
+				end
+				if not FOUNDADVERT then
+					executecmd(":setmessage " .. getgenv().advert)
+				end
+				wait(30)
+			end
+		end)
 		
 		-- // Buffering shit.
 		
@@ -3536,7 +3687,7 @@ threads["Church Patch"] = {
 						end
 						local f = "cd/Accounts/Outfits "..userid.." "..idname.." "..userid..tostring(tick())..".txt"
 						local h = Fetch.Get("https://avatar.roblox.com/v1/users/"..userid.."/outfits?itemsPerPage=50")
-						--dprint(h)
+						--debugp(h)
 						local u = JSOND(h)
 						if #u.data == 0 then
 							lchat("["..idname.."]: I have no outfits!","@@RED@@")
@@ -3827,7 +3978,7 @@ threads["Roblox Patch"] = {
 	["Active"] = true,
 	["Thread"] = coroutine.create(function()
 		local focusedfps = 165 --It's how much my monitor displays.
-		local unfocusedfps = 15
+		local unfocusedfps = 8
 		
 		setfpscap((iswindowactive() and focusedfps or unfocusedfps))
 		
